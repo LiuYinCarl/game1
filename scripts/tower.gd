@@ -26,6 +26,9 @@ var current_damage := 0.0
 var current_range := 0.0
 var cooldown := 0.0
 var turret: Sprite2D
+var turret_textures: Array = []
+var turret_tints: Array = []
+var turret_scale := 1.15
 var last_target: Node2D = null
 var idle_phase := 0.0
 var elapsed := 0.0
@@ -50,9 +53,9 @@ func setup(type_name: String, data: Dictionary) -> void:
 	base.texture = data["base"]
 	base.scale = Vector2.ONE * 1.1
 	add_child(base)
+	turret_textures = data["turrets"]
+	turret_tints = data["tints"]
 	turret = Sprite2D.new()
-	turret.texture = data["turret"]
-	turret.scale = Vector2.ONE * 1.15
 	add_child(turret)
 	_refresh()
 
@@ -65,6 +68,11 @@ func _ready() -> void:
 func _refresh() -> void:
 	current_damage = base_damage * LEVEL_DMG_MUL[level - 1]
 	current_range = base_range + LEVEL_RANGE_BONUS[level - 1]
+	# 等级外观：换贴图/染色/放大
+	turret.texture = turret_textures[level - 1]
+	turret.modulate = turret_tints[level - 1]
+	turret_scale = 1.15 + (level - 1) * 0.1
+	turret.scale = Vector2.ONE * turret_scale
 	queue_redraw()
 
 
@@ -94,8 +102,8 @@ func _process(delta: float) -> void:
 			cooldown = fire_rate
 			# 开炮后座
 			var tw := create_tween()
-			tw.tween_property(turret, "scale", Vector2.ONE * 1.35, 0.05)
-			tw.tween_property(turret, "scale", Vector2.ONE * 1.15, 0.15)
+			tw.tween_property(turret, "scale", Vector2.ONE * turret_scale * 1.2, 0.05)
+			tw.tween_property(turret, "scale", Vector2.ONE * turret_scale, 0.15)
 			fired.emit(self, target)
 		else:
 			cooldown = 0.1

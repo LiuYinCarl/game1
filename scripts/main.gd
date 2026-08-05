@@ -112,13 +112,19 @@ var ENEMY_TYPES := {
 var TOWER_TYPES := {
 	"archer": {"name": "箭塔", "cost": 70, "range": 200.0, "damage": 9.0, "rate": 0.45, "proj_speed": 480.0, "splash": 0.0, "color": Color("c07f2a"),
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turret": preload("res://assets/td/towerDefense_tile226.png"), "proj": preload("res://assets/td/towerDefense_tile272.png"), "proj_size": 14.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
+		"turrets": [preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png")],
+		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
+		"proj": preload("res://assets/td/towerDefense_tile272.png"), "proj_size": 14.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
 	"mage": {"name": "法师塔", "cost": 100, "range": 190.0, "damage": 26.0, "rate": 1.15, "proj_speed": 340.0, "splash": 0.0, "color": Color("7a5fd0"),
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turret": preload("res://assets/td/towerDefense_tile203.png"), "proj": preload("res://assets/td/towerDefense_tile251.png"), "proj_size": 42.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
+		"turrets": [preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile204.png"), preload("res://assets/td/towerDefense_tile205.png")],
+		"tints": [Color.WHITE, Color.WHITE, Color(1.2, 1.05, 0.7)],
+		"proj": preload("res://assets/td/towerDefense_tile251.png"), "proj_size": 42.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
 	"cannon": {"name": "炮塔", "cost": 125, "range": 190.0, "damage": 20.0, "rate": 1.6, "proj_speed": 300.0, "splash": 70.0, "color": Color("555555"),
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turret": preload("res://assets/td/towerDefense_tile228.png"), "proj": preload("res://assets/td/towerDefense_tile274.png"), "proj_size": 18.0},
+		"turrets": [preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png")],
+		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
+		"proj": preload("res://assets/td/towerDefense_tile274.png"), "proj_size": 18.0},
 }
 
 const WAVES_L1 := [
@@ -140,6 +146,9 @@ var game_ended := false
 var spawn_events: Array = []
 var spawn_hp_scale := 1.0
 var wave_time := 0.0
+const WAVE_COOLDOWN := 20.0
+var wave_cooldown := -1.0  # >=0 表示自动开波倒计时中
+var wave_timer_bar: ProgressBar
 var towers := {}  # spot_index -> Tower
 var selected_spot := -1
 var smoke_test := false
@@ -263,10 +272,15 @@ func _ready() -> void:
 		_debug_toggle_pause()
 		Engine.time_scale = 10.0
 	if OS.get_cmdline_user_args().has("--shot"):
-		gold = 500
+		gold = 999
 		_build_tower(0, "archer")
 		_build_tower(4, "mage")
 		_build_tower(1, "cannon")
+		for i in 2:
+			_upgrade_tower(0)
+			_upgrade_tower(4)
+			_upgrade_tower(1)
+		_close_menu()
 		_update_hud()
 		start_wave()
 		spawn_enemy("ogre")
@@ -298,6 +312,11 @@ func _ready() -> void:
 		await get_tree().create_timer(0.2).timeout
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/tafang_menu_tower.png")
+		# 自动开波倒计时进度条
+		_end_wave()
+		await get_tree().create_timer(7.0).timeout
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("/tmp/tafang_cooldown.png")
 
 
 func _load_level(idx: int) -> void:
@@ -360,6 +379,14 @@ func _process(delta: float) -> void:
 			spawn_events.pop_front()
 		if spawn_events.is_empty() and get_tree().get_nodes_in_group("enemies").is_empty():
 			_end_wave()
+	elif wave_cooldown > 0.0:
+		# 自动开波倒计时
+		wave_cooldown -= delta
+		wave_timer_bar.value = WAVE_COOLDOWN - wave_cooldown
+		start_button.text = "开始第 %d 波（%d 秒）" % [next_wave + 1, ceili(wave_cooldown)]
+		if wave_cooldown <= 0.0:
+			wave_cooldown = -1.0
+			start_wave()
 	elif smoke_test:
 		start_wave()
 
@@ -395,6 +422,8 @@ func start_wave() -> void:
 	if smoke_test:
 		print("[smoke] wave %d started, gold=%d lives=%d" % [next_wave, gold, lives])
 		_smoke_build()
+	wave_cooldown = -1.0
+	wave_timer_bar.visible = false
 	start_button.disabled = true
 	start_button.text = "第 %d 波进攻中…" % next_wave
 	hint_label.text = ""
@@ -427,6 +456,10 @@ func _end_wave() -> void:
 	start_button.disabled = false
 	start_button.text = "开始第 %d 波" % (next_wave + 1)
 	hint_label.text = "守住了！奖励 %d 金币" % bonus
+	# 启动自动开波倒计时
+	wave_cooldown = WAVE_COOLDOWN
+	wave_timer_bar.value = 0.0
+	wave_timer_bar.visible = true
 	_update_hud()
 
 
@@ -879,6 +912,23 @@ func _build_ui() -> void:
 	_style_button(start_button, true)
 	start_button.pressed.connect(start_wave)
 	ui_root.add_child(start_button)
+	# 自动开波倒计时进度条（嵌在按钮底部）
+	wave_timer_bar = ProgressBar.new()
+	wave_timer_bar.max_value = WAVE_COOLDOWN
+	wave_timer_bar.show_percentage = false
+	wave_timer_bar.position = Vector2(4, 42)
+	wave_timer_bar.size = Vector2(212, 6)
+	wave_timer_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0, 0, 0, 0.45)
+	bar_bg.set_corner_radius_all(3)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(1.0, 0.85, 0.3)
+	bar_fill.set_corner_radius_all(3)
+	wave_timer_bar.add_theme_stylebox_override("background", bar_bg)
+	wave_timer_bar.add_theme_stylebox_override("fill", bar_fill)
+	wave_timer_bar.visible = false
+	start_button.add_child(wave_timer_bar)
 
 	hint_label = Label.new()
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
