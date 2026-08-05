@@ -1,0 +1,7 @@
+图标来源：game-icons.net，CC BY 3.0（https://creativecommons.org/licenses/by/3.0/）
+- coins.png — "Coins" by Delapouite
+- crowned-heart.png — "Crowned Heart" by Lorc
+- crossed-swords.png — "Crossed Swords" by Lorc
+- fast-forward.png — "Fast Forward Button" by Delapouite
+- settings-knobs.png — "Settings Knobs" by Delapouite
+发布时需在署名信息中包含 game-icons.net。
