@@ -26,21 +26,77 @@ const FX_LIGHTNING = preload("res://assets/fx/spark_05.png")
 
 var SCREEN := Vector2(1920, 1080)
 
-var PATH_POINTS := PackedVector2Array([
-	Vector2(-60, 200), Vector2(480, 200), Vector2(480, 780),
-	Vector2(960, 780), Vector2(960, 320), Vector2(1400, 320),
-	Vector2(1400, 820), Vector2(1980, 820),
-])
-
-var CASTLE_POS := Vector2(1860, 820)
-
-var BUILD_SPOTS: Array[Vector2] = [
-	Vector2(300, 340), Vector2(300, 80), Vector2(640, 140),
-	Vector2(640, 500), Vector2(340, 870), Vector2(640, 940),
-	Vector2(800, 600), Vector2(1100, 480), Vector2(1100, 150),
-	Vector2(840, 320), Vector2(1540, 200), Vector2(1540, 600),
-	Vector2(1280, 930), Vector2(1600, 960), Vector2(1700, 650),
+# 六关数据目录。hand=true 使用手工波次 WAVES_L1，否则用 gen=[波数, 预算] 参数化生成
+var LEVELS := [
+	{
+		"name": "翠绿小径", "gold": 230, "lives": 20, "hp_growth": 0.07, "hand": true,
+		"path": [Vector2(-60, 200), Vector2(480, 200), Vector2(480, 780), Vector2(960, 780),
+			Vector2(960, 320), Vector2(1400, 320), Vector2(1400, 820), Vector2(1980, 820)],
+		"spots": [Vector2(300, 340), Vector2(300, 80), Vector2(640, 140), Vector2(640, 500),
+			Vector2(340, 870), Vector2(640, 940), Vector2(800, 600), Vector2(1100, 480),
+			Vector2(1100, 150), Vector2(840, 320), Vector2(1540, 200), Vector2(1540, 600),
+			Vector2(1280, 930), Vector2(1600, 960), Vector2(1700, 650)],
+	},
+	{
+		"name": "河畔弯道", "gold": 240, "lives": 20, "hp_growth": 0.08, "gen": [9, 60.0],
+		"path": [Vector2(-60, 860), Vector2(420, 860), Vector2(420, 300), Vector2(840, 300),
+			Vector2(840, 700), Vector2(1280, 700), Vector2(1280, 240), Vector2(1980, 240)],
+		"spots": [Vector2(240, 700), Vector2(240, 960), Vector2(580, 440), Vector2(580, 140),
+			Vector2(580, 860), Vector2(1000, 540), Vector2(1000, 860), Vector2(960, 160),
+			Vector2(1440, 400), Vector2(1440, 780), Vector2(1440, 80), Vector2(1700, 400)],
+	},
+	{
+		"name": "回旋谷", "gold": 250, "lives": 20, "hp_growth": 0.09, "gen": [9, 70.0],
+		"path": [Vector2(-60, 540), Vector2(300, 540), Vector2(300, 180), Vector2(1500, 180),
+			Vector2(1500, 900), Vector2(700, 900), Vector2(700, 540), Vector2(1100, 540),
+			Vector2(1100, 740), Vector2(1980, 740)],
+		"spots": [Vector2(140, 400), Vector2(140, 680), Vector2(460, 320), Vector2(460, 60),
+			Vector2(900, 60), Vector2(1340, 60), Vector2(1660, 320), Vector2(1660, 700),
+			Vector2(1300, 760), Vector2(880, 1000), Vector2(540, 760), Vector2(880, 640),
+			Vector2(1250, 560), Vector2(1300, 880), Vector2(1660, 880)],
+	},
+	{
+		"name": "双峰峡谷", "gold": 260, "lives": 20, "hp_growth": 0.10, "gen": [10, 78.0],
+		"path": [Vector2(-60, 240), Vector2(560, 240), Vector2(560, 500), Vector2(1100, 500),
+			Vector2(1100, 760), Vector2(1600, 760), Vector2(1600, 480), Vector2(1980, 480)],
+		"spots": [Vector2(380, 120), Vector2(380, 400), Vector2(720, 360), Vector2(720, 660),
+			Vector2(940, 640), Vector2(940, 340), Vector2(1250, 400), Vector2(1250, 660),
+			Vector2(1250, 900), Vector2(1450, 620), Vector2(1750, 620), Vector2(1750, 340),
+			Vector2(1450, 900)],
+	},
+	{
+		"name": "迷雾沼泽", "gold": 270, "lives": 20, "hp_growth": 0.11, "gen": [10, 88.0],
+		"path": [Vector2(-60, 180), Vector2(360, 180), Vector2(360, 420), Vector2(760, 420),
+			Vector2(760, 180), Vector2(1160, 180), Vector2(1160, 600), Vector2(560, 600),
+			Vector2(560, 880), Vector2(1560, 880), Vector2(1560, 560), Vector2(1980, 560)],
+		"spots": [Vector2(200, 60), Vector2(200, 300), Vector2(520, 300), Vector2(520, 540),
+			Vector2(920, 300), Vector2(920, 60), Vector2(1330, 300), Vector2(1240, 60),
+			Vector2(1000, 480), Vector2(800, 480), Vector2(400, 760), Vector2(720, 760),
+			Vector2(1000, 760), Vector2(1330, 760), Vector2(1400, 1000), Vector2(1700, 700),
+			Vector2(1700, 420)],
+	},
+	{
+		"name": "王城决战", "gold": 300, "lives": 20, "hp_growth": 0.13, "gen": [12, 95.0],
+		"path": [Vector2(-60, 600), Vector2(240, 600), Vector2(240, 240), Vector2(720, 240),
+			Vector2(720, 600), Vector2(1200, 600), Vector2(1200, 240), Vector2(1680, 240),
+			Vector2(1680, 700), Vector2(1980, 700)],
+		"spots": [Vector2(120, 420), Vector2(120, 760), Vector2(400, 400), Vector2(400, 120),
+			Vector2(560, 400), Vector2(640, 720), Vector2(880, 480), Vector2(880, 760),
+			Vector2(1000, 480), Vector2(1360, 400), Vector2(1360, 120), Vector2(1520, 120),
+			Vector2(1520, 480), Vector2(1800, 480)],
+	},
 ]
+
+# 当前关卡状态（由 _load_level 填充）
+var level_index := 0
+var level_name := ""
+var path_points := PackedVector2Array()
+var build_spots: Array = []
+var castle_pos := Vector2.ZERO
+var waves: Array = []
+var hp_growth := 0.07
+var start_gold := 230
+var start_lives := 20
 
 var ENEMY_TYPES := {
 	"grunt": {"hp": 35.0, "speed": 55.0, "reward": 12, "damage": 1, "radius": 13.0, "color": Color("6aa84f"),
@@ -65,10 +121,7 @@ var TOWER_TYPES := {
 		"turret": preload("res://assets/td/towerDefense_tile228.png"), "proj": preload("res://assets/td/towerDefense_tile274.png"), "proj_size": 18.0},
 }
 
-const START_GOLD := 230
-const START_LIVES := 20
-
-const WAVES := [
+const WAVES_L1 := [
 	[{"type": "grunt", "count": 6, "interval": 1.1}],
 	[{"type": "grunt", "count": 8, "interval": 0.9}, {"type": "wolf", "count": 3, "interval": 0.8, "delay": 3.0}],
 	[{"type": "grunt", "count": 6, "interval": 0.8}, {"type": "orc", "count": 3, "interval": 1.3, "delay": 2.0}],
@@ -118,7 +171,7 @@ class MapDrawer extends Node2D:
 	var main: Node2D
 
 	func _draw() -> void:
-		var pts: PackedVector2Array = main.PATH_POINTS
+		var pts: PackedVector2Array = main.path_points
 		# 草地
 		draw_rect(Rect2(Vector2.ZERO, main.SCREEN), Color("7fae4e"))
 		var rng := RandomNumberGenerator.new()
@@ -136,7 +189,7 @@ class MapDrawer extends Node2D:
 		for p in pts:
 			draw_circle(p, 27.0, Color("cbaa6e"))
 		# 建造点
-		for s in main.BUILD_SPOTS:
+		for s in main.build_spots:
 			draw_set_transform(s, 0.0, Vector2.ONE * 0.9)
 			draw_texture(main.TEX_SPOT, -main.TEX_SPOT.get_size() / 2.0)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -146,10 +199,10 @@ class MapDrawer extends Node2D:
 		rng.seed = 7
 		for i in 80:
 			var p := Vector2(rng.randf_range(20, main.SCREEN.x - 20), rng.randf_range(20, main.SCREEN.y - 20))
-			if main.dist_to_path(p) < 85.0 or p.distance_to(main.CASTLE_POS) < 120.0:
+			if main.dist_to_path(p) < 85.0 or p.distance_to(main.castle_pos) < 120.0:
 				continue
 			var near_spot := false
-			for s in main.BUILD_SPOTS:
+			for s in main.build_spots:
 				if p.distance_to(s) < 70.0:
 					near_spot = true
 					break
@@ -164,7 +217,7 @@ class MapDrawer extends Node2D:
 		draw_circle(spawn_pos, 34.0, Color("2e2e38"))
 		draw_arc(spawn_pos, 34.0, 0.0, TAU, 32, Color("55555f"), 3.0)
 		# 城堡
-		var c: Vector2 = main.CASTLE_POS
+		var c: Vector2 = main.castle_pos
 		draw_rect(Rect2(c.x - 52, c.y - 70, 20, 85), Color("8a8a95"))
 		draw_rect(Rect2(c.x + 32, c.y - 70, 20, 85), Color("8a8a95"))
 		draw_rect(Rect2(c.x - 40, c.y - 55, 80, 70), Color("9a9aa5"))
@@ -184,8 +237,12 @@ func _ready() -> void:
 	Engine.time_scale = 1.0  # 重开时重置倍速
 	add_to_group("game")
 	dot_texture = _make_dot_texture()
-	gold = START_GOLD
-	lives = START_LIVES
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--level="):
+			GameState.current_level = int(arg.get_slice("=", 1))
+	_load_level(GameState.current_level)
+	gold = start_gold
+	lives = start_lives
 	smoke_test = OS.get_cmdline_user_args().has("--smoke")
 	map_drawer = MapDrawer.new()
 	map_drawer.main = self
@@ -193,6 +250,7 @@ func _ready() -> void:
 	_build_ui()
 	_setup_music()
 	_update_hud()
+	hint_label.text = "第 %d 关 · %s" % [level_index + 1, level_name]
 	if smoke_test:
 		# 顺带覆盖调试功能路径
 		_cycle_speed()
@@ -242,6 +300,56 @@ func _ready() -> void:
 		get_viewport().get_texture().get_image().save_png("/tmp/tafang_menu_tower.png")
 
 
+func _load_level(idx: int) -> void:
+	level_index = clampi(idx, 0, LEVELS.size() - 1)
+	var L: Dictionary = LEVELS[level_index]
+	level_name = L["name"]
+	path_points = PackedVector2Array(L["path"])
+	build_spots = L["spots"]
+	start_gold = L["gold"]
+	start_lives = L["lives"]
+	hp_growth = L["hp_growth"]
+	waves = WAVES_L1.duplicate(true) if L.get("hand", false) else _compose_waves(int(L["gen"][0]), L["gen"][1])
+	# 城堡位置按路径末端方向自动推算
+	var last: Vector2 = path_points[path_points.size() - 1]
+	var prev: Vector2 = path_points[path_points.size() - 2]
+	var dir := (last - prev).normalized()
+	castle_pos = last - dir * 120.0
+	castle_pos.x = clampf(castle_pos.x, 80.0, SCREEN.x - 80.0)
+	castle_pos.y = clampf(castle_pos.y, 100.0, SCREEN.y - 60.0)
+
+
+func _compose_waves(count: int, budget0: float) -> Array:
+	# 参数化波次生成：预算随波次指数增长，后期加入食人魔
+	var result := []
+	var costs := {"grunt": 7.0, "wolf": 6.0, "orc": 20.0, "ogre": 130.0}
+	for w in count:
+		var budget := budget0 * pow(1.26, w)
+		var groups := []
+		if w >= count - 2:
+			var ogre_n := 1 + int(w == count - 1)
+			budget -= costs["ogre"] * ogre_n
+			groups.append({"type": "ogre", "count": ogre_n, "interval": 2.5})
+		var orc_n := 0
+		var wolf_n := 0
+		if w >= 2:
+			orc_n = mini(int(budget * 0.4 / costs["orc"]), 12)
+			budget -= orc_n * costs["orc"]
+		if w >= 1:
+			wolf_n = mini(int(budget * 0.35 / costs["wolf"]), 12)
+			budget -= wolf_n * costs["wolf"]
+		var grunt_n := mini(int(budget / costs["grunt"]), 24)
+		if grunt_n > 0:
+			groups.append({"type": "grunt", "count": grunt_n, "interval": maxf(0.4, 1.0 - w * 0.05),
+				"delay": 0.0 if groups.is_empty() else 2.0})
+		if wolf_n > 0:
+			groups.append({"type": "wolf", "count": wolf_n, "interval": 0.5, "delay": 2.0})
+		if orc_n > 0:
+			groups.append({"type": "orc", "count": orc_n, "interval": 0.9, "delay": 2.0})
+		result.append(groups)
+	return result
+
+
 func _process(delta: float) -> void:
 	if game_ended:
 		return
@@ -271,18 +379,18 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---------- 波次 ----------
 
 func start_wave() -> void:
-	if wave_active or game_ended or next_wave >= WAVES.size():
+	if wave_active or game_ended or next_wave >= waves.size():
 		return
 	wave_active = true
 	wave_time = 0.0
 	spawn_events.clear()
 	var t := 0.0
-	for group in WAVES[next_wave]:
+	for group in waves[next_wave]:
 		t += group.get("delay", 0.0)
 		for i in group["count"]:
 			spawn_events.append({"time": t, "type": group["type"]})
 			t += group["interval"]
-	spawn_hp_scale = 1.0 + 0.07 * next_wave
+	spawn_hp_scale = 1.0 + hp_growth * next_wave
 	next_wave += 1
 	if smoke_test:
 		print("[smoke] wave %d started, gold=%d lives=%d" % [next_wave, gold, lives])
@@ -296,7 +404,7 @@ func start_wave() -> void:
 func _smoke_build() -> void:
 	var order := ["archer", "cannon", "mage"]
 	var n := 0
-	for i in BUILD_SPOTS.size():
+	for i in build_spots.size():
 		if towers.has(i):
 			var t = towers[i]
 			if t.level < 3 and i % 2 == 0 and gold >= t.upgrade_cost():
@@ -311,7 +419,7 @@ func _smoke_build() -> void:
 
 func _end_wave() -> void:
 	wave_active = false
-	if next_wave >= WAVES.size():
+	if next_wave >= waves.size():
 		game_over(true)
 		return
 	var bonus := 15 + next_wave * 5
@@ -324,7 +432,7 @@ func _end_wave() -> void:
 
 func spawn_enemy(type_name: String) -> void:
 	var e = Enemy.new()
-	e.setup(type_name, PATH_POINTS, ENEMY_TYPES[type_name], spawn_hp_scale)
+	e.setup(type_name, path_points, ENEMY_TYPES[type_name], spawn_hp_scale)
 	e.died.connect(_on_enemy_died)
 	e.reached_end.connect(_on_enemy_reached_end)
 	add_child(e)
@@ -351,8 +459,8 @@ func _on_enemy_reached_end(e) -> void:
 # ---------- 建造 / 升级 / 出售 ----------
 
 func _spot_at(pos: Vector2) -> int:
-	for i in BUILD_SPOTS.size():
-		if BUILD_SPOTS[i].distance_to(pos) <= 30.0:
+	for i in build_spots.size():
+		if build_spots[i].distance_to(pos) <= 30.0:
 			return i
 	return -1
 
@@ -413,7 +521,7 @@ func _open_menu(idx: int) -> void:
 	# 菜单定位在建造点旁，并夹在屏幕内
 	menu_panel.reset_size()
 	var size := menu_panel.get_combined_minimum_size()
-	var pos: Vector2 = BUILD_SPOTS[idx] + Vector2(30, -size.y / 2.0)
+	var pos: Vector2 = build_spots[idx] + Vector2(30, -size.y / 2.0)
 	pos.x = clampf(pos.x, 8.0, SCREEN.x - size.x - 8.0)
 	pos.y = clampf(pos.y, 8.0, SCREEN.y - size.y - 8.0)
 	menu_panel.position = pos
@@ -435,7 +543,7 @@ func _build_tower(idx: int, key: String) -> void:
 	gold -= d["cost"]
 	var t = Tower.new()
 	t.setup(key, d)
-	t.position = BUILD_SPOTS[idx]
+	t.position = build_spots[idx]
 	t.fired.connect(_on_tower_fired)
 	add_child(t)
 	towers[idx] = t
@@ -686,8 +794,8 @@ func _setup_music() -> void:
 
 func dist_to_path(p: Vector2) -> float:
 	var best := INF
-	for i in PATH_POINTS.size() - 1:
-		var cp := Geometry2D.get_closest_point_to_segment(p, PATH_POINTS[i], PATH_POINTS[i + 1])
+	for i in path_points.size() - 1:
+		var cp := Geometry2D.get_closest_point_to_segment(p, path_points[i], path_points[i + 1])
 		best = minf(best, p.distance_to(cp))
 	return best
 
@@ -794,6 +902,16 @@ func _build_ui() -> void:
 	_style_button(speed_button)
 	speed_button.pressed.connect(_cycle_speed)
 	ui_root.add_child(speed_button)
+
+	# 返回主菜单
+	var menu_btn := Button.new()
+	menu_btn.text = "菜单"
+	menu_btn.custom_minimum_size = Vector2(106, 48)
+	menu_btn.position = Vector2(SCREEN.x - 142 - 118, 12)
+	menu_btn.add_theme_font_size_override("font_size", 18)
+	_style_button(menu_btn)
+	menu_btn.pressed.connect(_on_back_to_menu)
+	ui_root.add_child(menu_btn)
 
 	# 测试面板开关
 	var debug_toggle := Button.new()
@@ -941,7 +1059,7 @@ func _update_hud() -> void:
 			_punch_badge(lives_badge)
 		last_lives = lives
 	if next_wave != last_wave:
-		wave_label.text = "%d/%d" % [next_wave, WAVES.size()]
+		wave_label.text = "%d/%d" % [next_wave, waves.size()]
 		if last_wave >= 0:
 			_punch_badge(wave_badge)
 		last_wave = next_wave
@@ -952,6 +1070,9 @@ func game_over(win: bool) -> void:
 	if smoke_test:
 		print("[smoke] game over win=%s gold=%d lives=%d towers=%d shots=%s" % [win, gold, lives, towers.size(), str(smoke_shots)])
 	_close_menu()
+	var earned := 0
+	if win:
+		earned = GameState.complete_level(level_index, lives)
 	get_tree().paused = true
 	var panel := PanelContainer.new()
 	panel.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -963,7 +1084,7 @@ func game_over(win: bool) -> void:
 	panel.add_theme_stylebox_override("panel", pstyle)
 	ui_root.add_child(panel)
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 20)
+	vbox.add_theme_constant_override("separation", 18)
 	panel.add_child(vbox)
 	var title := Label.new()
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -975,17 +1096,59 @@ func game_over(win: bool) -> void:
 		title.text = "城堡陷落了…"
 		title.add_theme_color_override("font_color", Color("ff6b6b"))
 	vbox.add_child(title)
+	if win:
+		var star_label := Label.new()
+		star_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		star_label.add_theme_font_size_override("font_size", 36)
+		star_label.add_theme_color_override("font_color", Color("f1c40f"))
+		star_label.text = "★".repeat(earned) + "☆".repeat(3 - earned)
+		vbox.add_child(star_label)
+	if win and level_index < LEVELS.size() - 1:
+		var next_btn := Button.new()
+		next_btn.text = "下一关"
+		next_btn.custom_minimum_size = Vector2(200, 52)
+		next_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		next_btn.add_theme_font_size_override("font_size", 20)
+		_style_button(next_btn, true)
+		next_btn.pressed.connect(_on_next_level)
+		vbox.add_child(next_btn)
+	elif win:
+		var done_label := Label.new()
+		done_label.text = "已通关全部关卡！"
+		done_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		done_label.add_theme_font_size_override("font_size", 22)
+		done_label.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
+		vbox.add_child(done_label)
 	var restart := Button.new()
-	restart.text = "重新开始"
-	restart.custom_minimum_size = Vector2(200, 52)
+	restart.text = "重玩本关" if win else "重试"
+	restart.custom_minimum_size = Vector2(200, 48)
 	restart.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	restart.add_theme_font_size_override("font_size", 20)
-	_style_button(restart, true)
+	_style_button(restart, not win)
 	restart.pressed.connect(_on_restart)
 	vbox.add_child(restart)
+	var back := Button.new()
+	back.text = "返回主菜单"
+	back.custom_minimum_size = Vector2(200, 48)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.add_theme_font_size_override("font_size", 20)
+	_style_button(back)
+	back.pressed.connect(_on_back_to_menu)
+	vbox.add_child(back)
 	panel.reset_size()
 	panel.position = (SCREEN - panel.get_combined_minimum_size()) / 2.0
 	panel.size = panel.get_combined_minimum_size()
+
+
+func _on_next_level() -> void:
+	GameState.current_level = level_index + 1
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
+
+func _on_back_to_menu() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/start_menu.tscn")
 
 
 func _on_restart() -> void:
