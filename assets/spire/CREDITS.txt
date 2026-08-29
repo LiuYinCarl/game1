@@ -1,0 +1,6 @@
+Spire 系列素材（塔、敌人、灵体卫兵）
+来源：Foozle — Spire Tower Pack 1-4 / Enemy Pack 1-2 / Wisp Builder
+https://foozlecc.itch.io/ （美术：Baldur https://twitter.com/the__baldur）
+许可：Creative Commons Zero (CC0)，无需署名
+说明：本项目从中裁切了 4 种塔（各 3 级外观与弹丸）、7 种生物序列帧
+（含变色/缩放变体共 12 种敌人）与灵体卫兵动画，均已转为标准非隔行 PNG。

@@ -25,10 +25,12 @@ var current_range := 0.0
 var fire_rate := 1.0
 var splash := 0.0
 var cooldown := 0.0
+var base: Sprite2D
+var weapons: Array = []
+var weapon_frames := 0
+var weapon_scale := 1.0
+var projs: Array = []
 var turret: Sprite2D
-var turret_textures: Array = []
-var turret_tints: Array = []
-var turret_scale := 1.15
 var last_target: Node2D = null
 var idle_phase := 0.0
 var elapsed := 0.0
@@ -40,7 +42,7 @@ var rally_active := false
 var soldiers: Array = []
 var respawn_timer := 0.0
 
-const SOLDIER_TINTS := [Color(0.6, 0.78, 1.45), Color(0.5, 0.9, 1.35), Color(1.4, 1.15, 0.55)]
+const SOLDIER_TINTS := [Color.WHITE, Color(1.15, 1.05, 0.9), Color(1.4, 1.2, 0.6)]
 
 
 func setup(type_name: String, data: Dictionary) -> void:
@@ -56,15 +58,29 @@ func setup(type_name: String, data: Dictionary) -> void:
 	hit_size = data.get("hit_size", 0.03)
 	color = data["color"]
 	invested = base_cost
-	var base := Sprite2D.new()
+	# 底座：一张图含 1/2/3 级三个外观帧
+	base = Sprite2D.new()
 	base.texture = data["base"]
-	base.scale = Vector2.ONE * 1.1
+	base.hframes = 3
+	base.frame = 0
 	add_child(base)
-	turret_textures = data["turrets"]
-	turret_tints = data["tints"]
+	weapons = data.get("weapons", [null, null, null])
+	weapon_frames = int(data.get("weapon_frames", 0))
+	weapon_scale = float(data.get("weapon_scale", 1.0))
+	projs = data.get("projs", [proj_tex, proj_tex, proj_tex])
 	turret = Sprite2D.new()
+	if weapons[0] != null:
+		turret.texture = weapons[0]
+		turret.hframes = weapon_frames
+		turret.frame = 0
+		turret.position = WEAPON_OFFSET
+		turret.scale = Vector2.ONE * weapon_scale
+		turret.z_index = 20
 	add_child(turret)
 	_refresh()
+
+
+const WEAPON_OFFSET := Vector2(0, -30)
 
 
 func _ready() -> void:
@@ -78,11 +94,14 @@ func _refresh() -> void:
 	fire_rate = lv.get("rate", 1.0)
 	current_range = lv.get("range", 0.0)
 	splash = lv.get("splash", 0.0)
-	# 等级外观：换贴图/染色/放大
-	turret.texture = turret_textures[level - 1]
-	turret.modulate = turret_tints[level - 1]
-	turret_scale = (1.35 if type == "barracks" else 1.15) + (level - 1) * 0.1
-	turret.scale = Vector2.ONE * turret_scale
+	# 等级外观：底座换帧 + 换武器贴图
+	base.frame = level - 1
+	if weapons[level - 1] != null:
+		turret.texture = weapons[level - 1]
+		turret.hframes = weapon_frames
+		turret.frame = 0
+	if projs[level - 1] != null:
+		proj_tex = projs[level - 1]
 	# 升级后同步在场士兵的攻击力（生命由下一次补充时生效）
 	for s in soldiers:
 		if is_instance_valid(s):
@@ -137,22 +156,20 @@ func _process(delta: float) -> void:
 		if target != null:
 			last_target = target
 			cooldown = fire_rate
-			# 开炮后座
-			var tw := create_tween()
-			tw.tween_property(turret, "scale", Vector2.ONE * turret_scale * 1.2, 0.05)
-			tw.tween_property(turret, "scale", Vector2.ONE * turret_scale, 0.15)
+			_play_attack_anim()
 			fired.emit(self, target)
 		else:
 			cooldown = 0.1
-	# 平滑转向：有目标瞄准目标，无目标缓慢扫视
-	var desired := 0.0
-	if is_instance_valid(last_target) and not last_target.dead \
-			and global_position.distance_to(last_target.global_position) <= current_range:
-		desired = (last_target.global_position - global_position).angle() + PI / 2.0
-	else:
-		last_target = null
-		desired = sin(elapsed * 0.8 + idle_phase) * 0.5
-	turret.rotation = lerp_angle(turret.rotation, desired, minf(1.0, delta * 8.0))
+
+
+## 播放武器攻击动画（帧序列播一遍后回到待机的第 0 帧）
+func _play_attack_anim() -> void:
+	if weapon_frames <= 1 or not is_instance_valid(turret) or turret.texture == null:
+		return
+	var tw := create_tween()
+	tw.tween_method(func(f: int) -> void: turret.frame = clampi(f, 0, weapon_frames - 1),
+		0, weapon_frames - 1, 0.22)
+	tw.tween_callback(func() -> void: turret.frame = 0)
 
 
 func _process_barracks(delta: float) -> void:
@@ -178,8 +195,8 @@ func _spawn_soldier() -> void:
 	soldiers.append(s)
 	# 补兵小动效
 	var tw := create_tween()
-	tw.tween_property(turret, "scale", Vector2.ONE * turret_scale * 1.15, 0.08)
-	tw.tween_property(turret, "scale", Vector2.ONE * turret_scale, 0.2)
+	tw.tween_property(base, "scale", Vector2.ONE * 1.06, 0.08)
+	tw.tween_property(base, "scale", Vector2.ONE, 0.2)
 
 
 func on_soldier_died(s) -> void:

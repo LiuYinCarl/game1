@@ -28,12 +28,13 @@ func setup(tower_ref: Node2D, rally_pos: Vector2, slot_off: Vector2, s_hp: float
 	damage = s_dmg
 	tint = s_tint
 	sprite = Sprite2D.new()
-	sprite.texture = preload("res://assets/td/towerDefense_tile245.png")
+	sprite.texture = preload("res://assets/spire/soldier_wisp.png")
+	sprite.hframes = 4
 	sprite.modulate = tint
-	sprite.scale = Vector2.ONE * 0.8
+	sprite.scale = Vector2.ONE * 0.45
 	add_child(sprite)
 	var tw := create_tween()
-	tw.tween_property(sprite, "scale", Vector2.ONE * 0.95, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(sprite, "scale", Vector2.ONE * 0.55, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# 随机攻击相位，避免多个士兵同步挥击/同步闪白
 	attack_cd = randf_range(0.0, 0.9)
 
@@ -52,7 +53,7 @@ func _process(delta: float) -> void:
 		target = _pick_target()
 	if target != null:
 		var d: Vector2 = target.global_position - global_position
-		base_rot = d.angle() + PI / 2.0
+		base_rot = d.angle()
 		if d.length() > 13.0:
 			global_position += d.normalized() * speed * delta
 		elif attack_cd <= 0.0:
@@ -66,18 +67,19 @@ func _process(delta: float) -> void:
 				game.spawn_particles(target.global_position, {"texture": game.FX_DOT,
 					"color": Color("ffe9a0"), "count": 4, "speed": 70.0, "size": 0.022,
 					"gravity": 220.0, "lifetime": 0.22, "add": true, "rand_angle": true})
-		sprite.rotation = base_rot + sin(anim_time * 9.0) * 0.12 * (1.0 if attack_cd > 0.75 else 0.2)
+		# 灵体保持直立，只播放浮动动画
+		sprite.rotation = sin(anim_time * 3.0) * 0.06
+		sprite.frame = int(anim_time * 8.0) % 4
 	elif is_instance_valid(tower) and tower.rally_active:
 		var dest: Vector2 = rally + slot
 		var d := dest - global_position
 		if d.length() > 4.0:
 			global_position += d.normalized() * speed * delta
-			base_rot = d.angle() + PI / 2.0
-			sprite.rotation = base_rot
-		else:
-			sprite.rotation = sin(anim_time * 1.2) * 0.08
+		sprite.rotation = sin(anim_time * 3.0) * 0.06
+		sprite.frame = int(anim_time * 8.0) % 4
 	else:
-		sprite.rotation = sin(anim_time * 1.2) * 0.08
+		sprite.rotation = sin(anim_time * 3.0) * 0.06
+		sprite.frame = int(anim_time * 8.0) % 4
 	queue_redraw()
 
 

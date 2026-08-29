@@ -95,7 +95,8 @@ scripts/
   tower.gd             防御塔：索敌开火或派兵拦截（兵营）、平滑转向、逐级数值表、伤害类型
   projectile.gd        投射物：追踪弹道、发光拖尾、按伤害类型结算、单体/溅射伤害
 assets/
-  td/                  Kenney Tower Defense Top-Down 贴图（CC0）
+  td/                  Kenney Tower Defense Top-Down 贴图（地图装饰，CC0）
+  spire/               Foozle Spire 系列贴图（塔/敌人/灵体，CC0）
   fx/                  Kenney Particle Pack 粒子贴图（CC0）
   ui/                  game-icons.net 图标（CC BY 3.0）
   audio/               背景音乐（CC BY 4.0）；音效为运行时程序化合成，无外部素材
@@ -126,12 +127,13 @@ assets/
 
 | 素材 | 来源 | 许可 |
 | --- | --- | --- |
-| 塔/敌人/装饰贴图 | Kenney — Tower Defense (Top-Down) | CC0 |
+| 塔/敌人/装饰贴图（地图层） | Kenney — Tower Defense (Top-Down) | CC0 |
+| 塔/敌人/灵体（Spire 系列，单位层） | Foozle — Spire Tower/Enemy Packs（美术 Baldur） | CC0 |
 | 粒子贴图 | Kenney — Particle Pack | CC0 |
 | UI 图标 | game-icons.net | CC BY 3.0（需署名） |
 | 背景音乐 The Builder | Kevin MacLeod（incompetech.com） | CC BY 4.0（需署名） |
 
-署名详情见各目录下的 `CREDITS.txt`。发布游戏时请保留署名信息。
+署名详情见 `assets/td/CREDITS.txt` 与 `assets/spire/CREDITS.txt`。发布游戏时请保留署名信息。
 
 ## 后续方向
 

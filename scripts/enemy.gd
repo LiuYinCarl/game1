@@ -30,6 +30,7 @@ var selected := false
 
 var sprite: Sprite2D
 var anim_time := 0.0
+var anim_frames := 1
 var sprite_scale := 1.0
 var base_rot := 0.0  # 朝向基准角，行进颠簸/受击摆动叠加在其上
 
@@ -53,6 +54,8 @@ func setup(type_name: String, pts: PackedVector2Array, data: Dictionary, hp_scal
 	add_to_group("enemies")
 	sprite = Sprite2D.new()
 	sprite.texture = data["texture"]
+	anim_frames = int(data.get("anim_frames", 1))
+	sprite.hframes = anim_frames
 	sprite_scale = data["sprite_scale"]
 	sprite.modulate = tint
 	sprite.scale = Vector2.ZERO
@@ -71,7 +74,8 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(blocked_by):
 			blocked_by = null
 		else:
-			var fdir: float = (blocked_by.global_position - global_position).angle() + PI / 2.0
+			# 序列帧贴图朝下，朝向角为 dir.angle() - PI/2
+			var fdir: float = (blocked_by.global_position - global_position).angle() - PI / 2.0
 			base_rot = lerp_angle(base_rot, fdir, minf(1.0, delta * 8.0))
 			_bob(delta, 1.2)
 			if attack_cd <= 0.0:
@@ -99,7 +103,7 @@ func _process(delta: float) -> void:
 				return
 	var dir: Vector2 = (path[seg + 1] - path[seg]).normalized()
 	position = path[seg] + dir * seg_progress
-	base_rot = dir.angle() + PI / 2.0
+	base_rot = dir.angle() - PI / 2.0  # 序列帧贴图朝下
 	# 行进动效：速度越快颠簸越急，飞行单位悬空更高、上下浮动更明显
 	_bob(delta, 2.6 if flying else 1.5)
 
@@ -110,6 +114,9 @@ func _bob(delta: float, amp: float) -> void:
 	var hover := FLY_HEIGHT if flying else 0.0
 	sprite.position.y = sin(anim_time * freq) * amp - hover + sin(anim_time * 2.0) * (2.0 if flying else 0.0)
 	sprite.rotation = base_rot + sin(anim_time * freq * 0.5) * 0.06
+	# 行走序列帧动画
+	if anim_frames > 1:
+		sprite.frame = int(anim_time * 10.0) % anim_frames
 
 
 func take_damage(amount: float, dtype: String = "physical") -> void:

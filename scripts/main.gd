@@ -99,52 +99,54 @@ var start_gold := 230
 var start_lives := 20
 
 const ENEMY_NAMES := {
-	"grunt": "哥布林", "sapper": "哥布林工兵", "orc": "兽人", "shaman": "兽人萨满",
-	"knight": "重甲武士", "raider": "掠夺者装甲车", "ogre": "食人魔", "troll": "巨魔王",
-	"saucer": "飞碟", "recon": "侦察机", "bomber": "轰炸机", "phantom": "幽魂",
+	"grunt": "叶甲虫", "sapper": "花粉虫", "orc": "毒蝎", "shaman": "妖火虫",
+	"knight": "熔甲蟹", "raider": "赤蝎", "ogre": "巨铠蟹", "troll": "暴君巨蟹",
+	"saucer": "虚空蝶", "recon": "铁头飞蝗", "bomber": "钳击飞甲", "phantom": "幽蝶",
 }
 
 ## 抗性 armor：受到该类型伤害的倍率（<1 抗性 / >1 虚弱）；flying 飞行单位无法被士兵拦截
+## anim_frames：行走序列帧数（assets/spire 下的横条序列图，朝右）
 var ENEMY_TYPES := {
 	"grunt": {"hp": 35.0, "speed": 55.0, "reward": 12, "damage": 1, "radius": 13.0,
-		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 1.0},
+		"texture": preload("res://assets/spire/enemy_leafbug.png"), "anim_frames": 6, "sprite_scale": 0.85},
 	"sapper": {"hp": 26.0, "speed": 88.0, "reward": 10, "damage": 1, "radius": 11.0,
-		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 0.85,
-		"tint": Color(1.35, 0.95, 0.5)},
+		"texture": preload("res://assets/spire/enemy_leafbug.png"), "anim_frames": 6, "sprite_scale": 0.62,
+		"tint": Color(1.55, 1.35, 0.55)},
 	"orc": {"hp": 105.0, "speed": 44.0, "reward": 20, "damage": 1, "radius": 15.0,
 		"armor": {"physical": 1.25}, "soldier_dmg": 12.0,
-		"texture": preload("res://assets/td/towerDefense_tile247.png"), "sprite_scale": 1.15},
+		"texture": preload("res://assets/spire/enemy_scorpion.png"), "anim_frames": 8, "sprite_scale": 0.95},
 	"shaman": {"hp": 90.0, "speed": 48.0, "reward": 24, "damage": 1, "radius": 14.0,
 		"armor": {"magic": 0.4, "physical": 1.25}, "soldier_dmg": 14.0,
-		"texture": preload("res://assets/td/towerDefense_tile247.png"), "sprite_scale": 1.05,
-		"tint": Color(0.8, 0.6, 1.35)},
+		"texture": preload("res://assets/spire/enemy_firebug.png"), "anim_frames": 12, "sprite_scale": 0.78,
+		"tint": Color(1.2, 0.75, 1.55)},
 	"knight": {"hp": 170.0, "speed": 36.0, "reward": 30, "damage": 2, "radius": 16.0,
 		"armor": {"physical": 0.45, "magic": 1.6}, "soldier_dmg": 18.0,
-		"texture": preload("res://assets/td/towerDefense_tile268.png"), "sprite_scale": 1.0},
+		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 1.0},
 	"raider": {"hp": 130.0, "speed": 72.0, "reward": 28, "damage": 2, "radius": 16.0,
 		"armor": {"physical": 0.6, "magic": 1.1}, "soldier_dmg": 16.0,
-		"texture": preload("res://assets/td/towerDefense_tile269.png"), "sprite_scale": 0.9},
+		"texture": preload("res://assets/spire/enemy_scorpion.png"), "anim_frames": 8, "sprite_scale": 0.88,
+		"tint": Color(1.45, 0.95, 0.6)},
 	"ogre": {"hp": 550.0, "speed": 26.0, "reward": 65, "damage": 3, "radius": 22.0,
 		"armor": {"physical": 0.85, "magic": 0.85}, "soldier_dmg": 30.0,
-		"texture": preload("res://assets/td/towerDefense_tile250.png"), "sprite_scale": 1.5},
+		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 1.45,
+		"tint": Color(1.05, 0.9, 1.05)},
 	"troll": {"hp": 950.0, "speed": 30.0, "reward": 90, "damage": 5, "radius": 24.0,
 		"armor": {"magic": 0.5}, "soldier_dmg": 45.0,
-		"texture": preload("res://assets/td/towerDefense_tile250.png"), "sprite_scale": 1.75,
-		"tint": Color(0.55, 1.15, 0.7)},
+		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 1.9,
+		"tint": Color(0.95, 0.6, 0.6)},
 	"saucer": {"hp": 60.0, "speed": 75.0, "reward": 14, "damage": 1, "radius": 13.0,
 		"flying": true, "armor": {"magic": 1.3, "physical": 0.9},
-		"texture": preload("res://assets/td/towerDefense_tile248.png"), "sprite_scale": 0.9},
+		"texture": preload("res://assets/spire/enemy_voidfly.png"), "anim_frames": 6, "sprite_scale": 0.78},
 	"recon": {"hp": 45.0, "speed": 125.0, "reward": 14, "damage": 1, "radius": 13.0,
 		"flying": true, "armor": {"physical": 1.4, "magic": 0.9},
-		"texture": preload("res://assets/td/towerDefense_tile271.png"), "sprite_scale": 0.8},
+		"texture": preload("res://assets/spire/enemy_locust.png"), "anim_frames": 12, "sprite_scale": 0.72},
 	"bomber": {"hp": 150.0, "speed": 60.0, "reward": 30, "damage": 3, "radius": 16.0,
 		"flying": true, "armor": {"physical": 0.7, "magic": 1.2},
-		"texture": preload("res://assets/td/towerDefense_tile270.png"), "sprite_scale": 1.1,
-		"tint": Color(1.35, 0.75, 0.65)},
+		"texture": preload("res://assets/spire/enemy_clampfly.png"), "anim_frames": 8, "sprite_scale": 1.0},
 	"phantom": {"hp": 85.0, "speed": 70.0, "reward": 26, "damage": 2, "radius": 14.0,
 		"flying": true, "armor": {"physical": 0.2, "magic": 1.8},
-		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 1.05,
-		"tint": Color(0.65, 0.85, 1.6, 0.62)},
+		"texture": preload("res://assets/spire/enemy_voidfly.png"), "anim_frames": 6, "sprite_scale": 0.85,
+		"tint": Color(0.75, 0.85, 1.6, 0.62)},
 }
 
 const TOWER_ROLE := {
@@ -154,7 +156,9 @@ const TOWER_ROLE := {
 
 # 塔的数值按等级显式成表：damage 伤害 / rate 开火间隔（秒）/ range 射程 / splash 溅射半径，
 # cost 为升到该级的花费（levels[0] 是 1 级建造数据，cost 字段仅在 2、3 级有效）；
-# 兵营为 soldiers 士兵数 / soldier_hp 士兵生命 / soldier_dmg 士兵攻击 / respawn 补兵秒数
+# 兵营为 soldiers 士兵数 / soldier_hp 士兵生命 / soldier_dmg 士兵攻击 / respawn 补兵秒数。
+# base 为三级外观序列图（64px 一帧），weapons 为各级武器攻击动画横条，
+# projs 为各级弹丸（竖直朝上绘制，飞行时按方向旋转）
 var TOWER_TYPES := {
 	"archer": {"name": "箭塔", "cost": 70, "damage_type": "physical", "proj_speed": 480.0, "color": Color("c07f2a"),
 		"levels": [
@@ -162,39 +166,41 @@ var TOWER_TYPES := {
 			{"damage": 14.0, "rate": 0.40, "range": 212.0, "cost": 60},
 			{"damage": 22.0, "rate": 0.35, "range": 224.0, "cost": 95},
 		],
-		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turrets": [preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png")],
-		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
-		"proj": preload("res://assets/td/towerDefense_tile272.png"), "proj_size": 14.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
+		"base": preload("res://assets/spire/tower_archer_base.png"),
+		"weapons": [preload("res://assets/spire/tower_archer_w1.png"), preload("res://assets/spire/tower_archer_w2.png"), preload("res://assets/spire/tower_archer_w3.png")],
+		"weapon_frames": 6, "weapon_scale": 0.85,
+		"projs": [preload("res://assets/spire/tower_archer_p1.png"), preload("res://assets/spire/tower_archer_p2.png"), preload("res://assets/spire/tower_archer_p3.png")],
+		"proj_size": 26.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
 	"mage": {"name": "法师塔", "cost": 100, "damage_type": "magic", "proj_speed": 340.0, "color": Color("7a5fd0"),
 		"levels": [
 			{"damage": 26.0, "rate": 1.15, "range": 190.0},
 			{"damage": 42.0, "rate": 1.05, "range": 202.0, "cost": 85},
 			{"damage": 68.0, "rate": 0.95, "range": 214.0, "cost": 140},
 		],
-		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turrets": [preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile204.png"), preload("res://assets/td/towerDefense_tile205.png")],
-		"tints": [Color.WHITE, Color.WHITE, Color(1.2, 1.05, 0.7)],
-		"proj": preload("res://assets/td/towerDefense_tile251.png"), "proj_size": 42.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
+		"base": preload("res://assets/spire/tower_mage_base.png"),
+		"weapons": [preload("res://assets/spire/tower_mage_w1.png"), preload("res://assets/spire/tower_mage_w2.png"), preload("res://assets/spire/tower_mage_w3.png")],
+		"weapon_frames": 8, "weapon_scale": 0.85,
+		"projs": [preload("res://assets/spire/tower_mage_p1.png"), preload("res://assets/spire/tower_mage_p2.png"), preload("res://assets/spire/tower_mage_p3.png")],
+		"proj_size": 16.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
 	"cannon": {"name": "炮塔", "cost": 125, "damage_type": "physical", "proj_speed": 300.0, "color": Color("555555"),
 		"levels": [
 			{"damage": 20.0, "rate": 1.6, "range": 190.0, "splash": 70.0},
 			{"damage": 34.0, "rate": 1.45, "range": 202.0, "splash": 80.0, "cost": 105},
 			{"damage": 56.0, "rate": 1.30, "range": 214.0, "splash": 90.0, "cost": 170},
 		],
-		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turrets": [preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png")],
-		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
-		"proj": preload("res://assets/td/towerDefense_tile274.png"), "proj_size": 18.0},
+		"base": preload("res://assets/spire/tower_cannon_base.png"),
+		"weapons": [preload("res://assets/spire/tower_cannon_w1.png"), preload("res://assets/spire/tower_cannon_w2.png"), preload("res://assets/spire/tower_cannon_w3.png")],
+		"weapon_frames": 6, "weapon_scale": 0.95,
+		"projs": [preload("res://assets/spire/tower_cannon_p1.png"), preload("res://assets/spire/tower_cannon_p2.png"), preload("res://assets/spire/tower_cannon_p3.png")],
+		"proj_size": 26.0},
 	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
 		"levels": [
 			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
 			{"soldiers": 3, "soldier_hp": 95.0, "soldier_dmg": 12.0, "respawn": 5.0, "range": 190.0, "cost": 90},
 			{"soldiers": 3, "soldier_hp": 150.0, "soldier_dmg": 19.0, "respawn": 4.0, "range": 190.0, "cost": 150},
 		],
-		"base": preload("res://assets/td/towerDefense_tile180.png"),
-		"turrets": [preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile203.png")],
-		"tints": [Color(0.65, 0.8, 1.4), Color(0.55, 0.95, 1.4), Color(1.35, 1.1, 0.55)]},
+		"base": preload("res://assets/spire/tower_barracks_base.png"),
+		"weapons": [null, null, null], "weapon_frames": 0, "weapon_scale": 1.0},
 }
 
 const WAVES_L1 := [
@@ -556,7 +562,7 @@ void fragment() {
 			var key: String = ["archer", "mage", "cannon"][i]
 			var d: Dictionary = TOWER_TYPES[key]
 			var tp = Projectile.new()
-			tp.setup(Vector2(80, 300 + i * 40), first_enemy, 35.0, 0.0, 0.0, d["proj"], d["proj_size"])
+			tp.setup(Vector2(80, 300 + i * 40), first_enemy, 35.0, 0.0, 0.0, d["projs"][0], d["proj_size"])
 			add_child(tp)
 		await get_tree().create_timer(2.0).timeout
 		# 手动触发特效，便于截图确认
