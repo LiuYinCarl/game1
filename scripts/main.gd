@@ -38,7 +38,7 @@ var LEVELS := [
 			Vector2(1280, 930), Vector2(1600, 960), Vector2(1700, 650)],
 	},
 	{
-		"name": "河畔弯道", "gold": 240, "lives": 20, "hp_growth": 0.08, "gen": [9, 60.0],
+		"name": "河畔弯道", "gold": 240, "lives": 20, "hp_growth": 0.09, "gen": [9, 60.0],
 		"path": [Vector2(-60, 860), Vector2(420, 860), Vector2(420, 300), Vector2(840, 300),
 			Vector2(840, 700), Vector2(1280, 700), Vector2(1280, 240), Vector2(1980, 240)],
 		"spots": [Vector2(240, 700), Vector2(240, 960), Vector2(580, 440), Vector2(580, 140),
@@ -46,7 +46,7 @@ var LEVELS := [
 			Vector2(1440, 400), Vector2(1440, 780), Vector2(1440, 80), Vector2(1700, 400)],
 	},
 	{
-		"name": "回旋谷", "gold": 250, "lives": 20, "hp_growth": 0.09, "gen": [9, 70.0],
+		"name": "回旋谷", "gold": 250, "lives": 20, "hp_growth": 0.105, "gen": [9, 70.0],
 		"path": [Vector2(-60, 540), Vector2(300, 540), Vector2(300, 180), Vector2(1500, 180),
 			Vector2(1500, 900), Vector2(700, 900), Vector2(700, 540), Vector2(1100, 540),
 			Vector2(1100, 740), Vector2(1980, 740)],
@@ -56,7 +56,7 @@ var LEVELS := [
 			Vector2(1250, 560), Vector2(1300, 880), Vector2(1660, 880)],
 	},
 	{
-		"name": "双峰峡谷", "gold": 260, "lives": 20, "hp_growth": 0.10, "gen": [10, 78.0],
+		"name": "双峰峡谷", "gold": 260, "lives": 20, "hp_growth": 0.12, "gen": [10, 78.0],
 		"path": [Vector2(-60, 240), Vector2(560, 240), Vector2(560, 500), Vector2(1100, 500),
 			Vector2(1100, 760), Vector2(1600, 760), Vector2(1600, 480), Vector2(1980, 480)],
 		"spots": [Vector2(380, 120), Vector2(380, 400), Vector2(720, 360), Vector2(720, 660),
@@ -65,7 +65,7 @@ var LEVELS := [
 			Vector2(1450, 900)],
 	},
 	{
-		"name": "迷雾沼泽", "gold": 270, "lives": 20, "hp_growth": 0.11, "gen": [10, 88.0],
+		"name": "迷雾沼泽", "gold": 270, "lives": 20, "hp_growth": 0.13, "gen": [10, 88.0],
 		"path": [Vector2(-60, 180), Vector2(360, 180), Vector2(360, 420), Vector2(760, 420),
 			Vector2(760, 180), Vector2(1160, 180), Vector2(1160, 600), Vector2(560, 600),
 			Vector2(560, 880), Vector2(1560, 880), Vector2(1560, 560), Vector2(1980, 560)],
@@ -76,7 +76,7 @@ var LEVELS := [
 			Vector2(1700, 420)],
 	},
 	{
-		"name": "王城决战", "gold": 300, "lives": 20, "hp_growth": 0.13, "gen": [12, 95.0],
+		"name": "王城决战", "gold": 300, "lives": 20, "hp_growth": 0.15, "gen": [12, 95.0],
 		"path": [Vector2(-60, 600), Vector2(240, 600), Vector2(240, 240), Vector2(720, 240),
 			Vector2(720, 600), Vector2(1200, 600), Vector2(1200, 240), Vector2(1680, 240),
 			Vector2(1680, 700), Vector2(1980, 700)],
@@ -98,44 +98,118 @@ var hp_growth := 0.07
 var start_gold := 230
 var start_lives := 20
 
-var ENEMY_TYPES := {
-	"grunt": {"hp": 35.0, "speed": 55.0, "reward": 12, "damage": 1, "radius": 13.0, "color": Color("6aa84f"),
-		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 1.0},
-	"wolf": {"hp": 24.0, "speed": 105.0, "reward": 9, "damage": 1, "radius": 13.0, "color": Color("b7b7b7"),
-		"texture": preload("res://assets/td/towerDefense_tile270.png"), "sprite_scale": 0.75},
-	"orc": {"hp": 100.0, "speed": 44.0, "reward": 20, "damage": 1, "radius": 15.0, "color": Color("38761d"),
-		"texture": preload("res://assets/td/towerDefense_tile247.png"), "sprite_scale": 1.15},
-	"ogre": {"hp": 550.0, "speed": 26.0, "reward": 100, "damage": 3, "radius": 22.0, "color": Color("674ea7"),
-		"texture": preload("res://assets/td/towerDefense_tile250.png"), "sprite_scale": 1.5},
+const ENEMY_NAMES := {
+	"grunt": "哥布林", "sapper": "哥布林工兵", "orc": "兽人", "shaman": "兽人萨满",
+	"knight": "重甲武士", "raider": "掠夺者装甲车", "ogre": "食人魔", "troll": "巨魔王",
+	"saucer": "飞碟", "recon": "侦察机", "bomber": "轰炸机", "phantom": "幽魂",
 }
 
+## 抗性 armor：受到该类型伤害的倍率（<1 抗性 / >1 虚弱）；flying 飞行单位无法被士兵拦截
+var ENEMY_TYPES := {
+	"grunt": {"hp": 35.0, "speed": 55.0, "reward": 12, "damage": 1, "radius": 13.0,
+		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 1.0},
+	"sapper": {"hp": 26.0, "speed": 88.0, "reward": 10, "damage": 1, "radius": 11.0,
+		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 0.85,
+		"tint": Color(1.35, 0.95, 0.5)},
+	"orc": {"hp": 105.0, "speed": 44.0, "reward": 20, "damage": 1, "radius": 15.0,
+		"armor": {"physical": 1.25}, "soldier_dmg": 12.0,
+		"texture": preload("res://assets/td/towerDefense_tile247.png"), "sprite_scale": 1.15},
+	"shaman": {"hp": 90.0, "speed": 48.0, "reward": 24, "damage": 1, "radius": 14.0,
+		"armor": {"magic": 0.4, "physical": 1.25}, "soldier_dmg": 14.0,
+		"texture": preload("res://assets/td/towerDefense_tile247.png"), "sprite_scale": 1.05,
+		"tint": Color(0.8, 0.6, 1.35)},
+	"knight": {"hp": 170.0, "speed": 36.0, "reward": 30, "damage": 2, "radius": 16.0,
+		"armor": {"physical": 0.45, "magic": 1.6}, "soldier_dmg": 18.0,
+		"texture": preload("res://assets/td/towerDefense_tile268.png"), "sprite_scale": 1.0},
+	"raider": {"hp": 130.0, "speed": 72.0, "reward": 28, "damage": 2, "radius": 16.0,
+		"armor": {"physical": 0.6, "magic": 1.1}, "soldier_dmg": 16.0,
+		"texture": preload("res://assets/td/towerDefense_tile269.png"), "sprite_scale": 0.9},
+	"ogre": {"hp": 550.0, "speed": 26.0, "reward": 65, "damage": 3, "radius": 22.0,
+		"armor": {"physical": 0.85, "magic": 0.85}, "soldier_dmg": 30.0,
+		"texture": preload("res://assets/td/towerDefense_tile250.png"), "sprite_scale": 1.5},
+	"troll": {"hp": 950.0, "speed": 30.0, "reward": 90, "damage": 5, "radius": 24.0,
+		"armor": {"magic": 0.5}, "soldier_dmg": 45.0,
+		"texture": preload("res://assets/td/towerDefense_tile250.png"), "sprite_scale": 1.75,
+		"tint": Color(0.55, 1.15, 0.7)},
+	"saucer": {"hp": 60.0, "speed": 75.0, "reward": 14, "damage": 1, "radius": 13.0,
+		"flying": true, "armor": {"magic": 1.3, "physical": 0.9},
+		"texture": preload("res://assets/td/towerDefense_tile248.png"), "sprite_scale": 0.9},
+	"recon": {"hp": 45.0, "speed": 125.0, "reward": 14, "damage": 1, "radius": 13.0,
+		"flying": true, "armor": {"physical": 1.4, "magic": 0.9},
+		"texture": preload("res://assets/td/towerDefense_tile271.png"), "sprite_scale": 0.8},
+	"bomber": {"hp": 150.0, "speed": 60.0, "reward": 30, "damage": 3, "radius": 16.0,
+		"flying": true, "armor": {"physical": 0.7, "magic": 1.2},
+		"texture": preload("res://assets/td/towerDefense_tile270.png"), "sprite_scale": 1.1,
+		"tint": Color(1.35, 0.75, 0.65)},
+	"phantom": {"hp": 85.0, "speed": 70.0, "reward": 26, "damage": 2, "radius": 14.0,
+		"flying": true, "armor": {"physical": 0.2, "magic": 1.8},
+		"texture": preload("res://assets/td/towerDefense_tile245.png"), "sprite_scale": 1.05,
+		"tint": Color(0.65, 0.85, 1.6, 0.62)},
+}
+
+const TOWER_ROLE := {
+	"archer": "单体速射 · 物理伤害", "mage": "高伤爆发 · 魔法伤害",
+	"cannon": "范围溅射 · 物理伤害", "barracks": "派出士兵拦截敌人",
+}
+
+# 塔的数值按等级显式成表：damage 伤害 / rate 开火间隔（秒）/ range 射程 / splash 溅射半径，
+# cost 为升到该级的花费（levels[0] 是 1 级建造数据，cost 字段仅在 2、3 级有效）；
+# 兵营为 soldiers 士兵数 / soldier_hp 士兵生命 / soldier_dmg 士兵攻击 / respawn 补兵秒数
 var TOWER_TYPES := {
-	"archer": {"name": "箭塔", "cost": 70, "range": 200.0, "damage": 9.0, "rate": 0.45, "proj_speed": 480.0, "splash": 0.0, "color": Color("c07f2a"),
+	"archer": {"name": "箭塔", "cost": 70, "damage_type": "physical", "proj_speed": 480.0, "color": Color("c07f2a"),
+		"levels": [
+			{"damage": 9.0, "rate": 0.45, "range": 200.0},
+			{"damage": 14.0, "rate": 0.40, "range": 212.0, "cost": 60},
+			{"damage": 22.0, "rate": 0.35, "range": 224.0, "cost": 95},
+		],
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
 		"turrets": [preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png"), preload("res://assets/td/towerDefense_tile226.png")],
 		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
 		"proj": preload("res://assets/td/towerDefense_tile272.png"), "proj_size": 14.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
-	"mage": {"name": "法师塔", "cost": 100, "range": 190.0, "damage": 26.0, "rate": 1.15, "proj_speed": 340.0, "splash": 0.0, "color": Color("7a5fd0"),
+	"mage": {"name": "法师塔", "cost": 100, "damage_type": "magic", "proj_speed": 340.0, "color": Color("7a5fd0"),
+		"levels": [
+			{"damage": 26.0, "rate": 1.15, "range": 190.0},
+			{"damage": 42.0, "rate": 1.05, "range": 202.0, "cost": 85},
+			{"damage": 68.0, "rate": 0.95, "range": 214.0, "cost": 140},
+		],
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
 		"turrets": [preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile204.png"), preload("res://assets/td/towerDefense_tile205.png")],
 		"tints": [Color.WHITE, Color.WHITE, Color(1.2, 1.05, 0.7)],
 		"proj": preload("res://assets/td/towerDefense_tile251.png"), "proj_size": 42.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
-	"cannon": {"name": "炮塔", "cost": 125, "range": 190.0, "damage": 20.0, "rate": 1.6, "proj_speed": 300.0, "splash": 70.0, "color": Color("555555"),
+	"cannon": {"name": "炮塔", "cost": 125, "damage_type": "physical", "proj_speed": 300.0, "color": Color("555555"),
+		"levels": [
+			{"damage": 20.0, "rate": 1.6, "range": 190.0, "splash": 70.0},
+			{"damage": 34.0, "rate": 1.45, "range": 202.0, "splash": 80.0, "cost": 105},
+			{"damage": 56.0, "rate": 1.30, "range": 214.0, "splash": 90.0, "cost": 170},
+		],
 		"base": preload("res://assets/td/towerDefense_tile180.png"),
 		"turrets": [preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png"), preload("res://assets/td/towerDefense_tile228.png")],
 		"tints": [Color.WHITE, Color(0.8, 0.95, 1.2), Color(1.3, 1.05, 0.6)],
 		"proj": preload("res://assets/td/towerDefense_tile274.png"), "proj_size": 18.0},
+	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
+		"levels": [
+			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
+			{"soldiers": 3, "soldier_hp": 95.0, "soldier_dmg": 12.0, "respawn": 5.0, "range": 190.0, "cost": 90},
+			{"soldiers": 3, "soldier_hp": 150.0, "soldier_dmg": 19.0, "respawn": 4.0, "range": 190.0, "cost": 150},
+		],
+		"base": preload("res://assets/td/towerDefense_tile180.png"),
+		"turrets": [preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile203.png"), preload("res://assets/td/towerDefense_tile203.png")],
+		"tints": [Color(0.65, 0.8, 1.4), Color(0.55, 0.95, 1.4), Color(1.35, 1.1, 0.55)]},
 }
 
 const WAVES_L1 := [
 	[{"type": "grunt", "count": 6, "interval": 1.1}],
-	[{"type": "grunt", "count": 8, "interval": 0.9}, {"type": "wolf", "count": 3, "interval": 0.8, "delay": 3.0}],
-	[{"type": "grunt", "count": 6, "interval": 0.8}, {"type": "orc", "count": 3, "interval": 1.3, "delay": 2.0}],
-	[{"type": "wolf", "count": 8, "interval": 0.5}, {"type": "grunt", "count": 6, "interval": 0.9, "delay": 4.0}],
-	[{"type": "orc", "count": 6, "interval": 1.0}, {"type": "grunt", "count": 6, "interval": 0.7, "delay": 2.0}],
-	[{"type": "wolf", "count": 10, "interval": 0.4}, {"type": "orc", "count": 4, "interval": 1.0, "delay": 3.0}],
-	[{"type": "orc", "count": 8, "interval": 0.8}, {"type": "wolf", "count": 6, "interval": 0.5, "delay": 2.0}, {"type": "grunt", "count": 8, "interval": 0.6, "delay": 5.0}],
-	[{"type": "ogre", "count": 1, "interval": 1.0}, {"type": "orc", "count": 6, "interval": 0.9, "delay": 3.0}, {"type": "wolf", "count": 8, "interval": 0.5, "delay": 6.0}],
+	[{"type": "grunt", "count": 8, "interval": 0.9}, {"type": "sapper", "count": 5, "interval": 0.6, "delay": 3.0}],
+	[{"type": "grunt", "count": 6, "interval": 0.8}, {"type": "saucer", "count": 4, "interval": 1.0, "delay": 2.0}],
+	[{"type": "orc", "count": 5, "interval": 1.1}, {"type": "sapper", "count": 6, "interval": 0.5, "delay": 3.0},
+		{"type": "shaman", "count": 2, "interval": 1.4, "delay": 5.0}],
+	[{"type": "recon", "count": 6, "interval": 0.7}, {"type": "orc", "count": 4, "interval": 1.0, "delay": 3.0}],
+	[{"type": "knight", "count": 3, "interval": 1.6}, {"type": "grunt", "count": 8, "interval": 0.6, "delay": 2.0},
+		{"type": "shaman", "count": 3, "interval": 1.2, "delay": 4.0}],
+	[{"type": "raider", "count": 3, "interval": 1.4}, {"type": "phantom", "count": 4, "interval": 1.0, "delay": 3.0},
+		{"type": "saucer", "count": 5, "interval": 0.7, "delay": 5.0}],
+	[{"type": "bomber", "count": 2, "interval": 2.0}, {"type": "ogre", "count": 1, "interval": 1.0},
+		{"type": "troll", "count": 1, "interval": 1.0, "delay": 5.0}, {"type": "orc", "count": 4, "interval": 0.9, "delay": 7.0}],
 ]
 
 var gold: int
@@ -155,6 +229,9 @@ var smoke_test := false
 var smoke_shots := {}
 
 var map_drawer: Node2D
+var camera: Camera2D
+var shake_amp := 0.0
+var hovered_spot := -1
 var ui_root: Control
 var gold_label: Label
 var lives_label: Label
@@ -168,9 +245,17 @@ var last_wave := -1
 var start_button: Button
 var hint_label: Label
 var menu_panel: PanelContainer
+var menu_buttons: Array = []  # [[Button, 所需金币]]，金币变化时刷新可用状态
+var selected_enemy: Node2D = null
+var enemy_hp_label: Label
+var enemy_info_labels: Array = []
+var rally_pick_tower: Node2D = null  # 非 null 表示正在拾取兵营集合点
 var speed_button: Button
 var debug_panel: PanelContainer
 var music_player: AudioStreamPlayer
+var sfx_pool: Array = []
+var sfx_streams := {}
+var sfx_idx := 0
 
 const SPEEDS := [1.0, 2.0, 3.0]
 var speed_idx := 0
@@ -180,31 +265,93 @@ class MapDrawer extends Node2D:
 	var main: Node2D
 
 	func _draw() -> void:
-		var pts: PackedVector2Array = main.path_points
-		# 草地
-		draw_rect(Rect2(Vector2.ZERO, main.SCREEN), Color("7fae4e"))
+		_draw_ground()
+		_draw_road()
+		_draw_spots()
+		_draw_deco()
+		_draw_portal()
+		_draw_castle()
+		_draw_overlays()
+
+	func _draw_ground() -> void:
 		var rng := RandomNumberGenerator.new()
-		rng.seed = 42
-		for i in 110:
+		# 草地底色 + 大块明暗斑驳（错落的草地色块，避免纯色平涂感）
+		draw_rect(Rect2(Vector2.ZERO, main.SCREEN), Color("77a549"))
+		rng.seed = 11
+		for i in 60:
 			var p := Vector2(rng.randf_range(0, main.SCREEN.x), rng.randf_range(0, main.SCREEN.y))
-			if main.dist_to_path(p) < 60.0:
+			var r := rng.randf_range(60, 170)
+			var c: Color = Color("7fae4e") if rng.randf() < 0.5 else Color("6f9f41")
+			draw_circle(p, r, Color(c.r, c.g, c.b, 0.30))
+		# 草地细碎纹理与草叶
+		rng.seed = 42
+		var detail: Array = [Color("74a244"), Color("82b355"), Color("699a3c"), Color("8cba5e")]
+		for i in 340:
+			var p := Vector2(rng.randf_range(0, main.SCREEN.x), rng.randf_range(0, main.SCREEN.y))
+			if main.dist_to_path(p) < 62.0:
 				continue
-			draw_circle(p, rng.randf_range(6, 18), Color("74a244"))
-		# 道路（先描边后内芯，拐角处补圆）
-		draw_polyline(pts, Color("8b6b43"), 64.0)
+			var c: Color = detail[rng.randi_range(0, detail.size() - 1)]
+			if rng.randf() < 0.3:
+				# 小草叶：两笔短线
+				var h := rng.randf_range(3.0, 6.0)
+				var lean := rng.randf_range(-2.0, 2.0)
+				draw_line(p, p + Vector2(lean, -h), Color(c.r, c.g, c.b, 0.55), 1.4)
+				draw_line(p + Vector2(3, 1), p + Vector2(3 + lean, -h * 0.8), Color(c.r, c.g, c.b, 0.45), 1.2)
+			else:
+				draw_circle(p, rng.randf_range(2, 8), Color(c.r, c.g, c.b, 0.5))
+
+	func _draw_road() -> void:
+		var pts: PackedVector2Array = main.path_points
+		var rng := RandomNumberGenerator.new()
+		# 路面投影（往下一线，制造浮起感）
+		var shadow := PackedVector2Array()
 		for p in pts:
-			draw_circle(p, 32.0, Color("8b6b43"))
-		draw_polyline(pts, Color("cbaa6e"), 54.0)
+			shadow.append(p + Vector2(0, 10))
+		draw_polyline(shadow, Color(0, 0, 0, 0.16), 64.0)
+		for p in shadow:
+			draw_circle(p, 32.0, Color(0, 0, 0, 0.16))
+		# 路肩（深）→ 路面 → 中央磨损带（亮）
+		draw_polyline(pts, Color("8a6a42"), 66.0)
 		for p in pts:
-			draw_circle(p, 27.0, Color("cbaa6e"))
-		# 建造点
-		for s in main.build_spots:
+			draw_circle(p, 33.0, Color("8a6a42"))
+		draw_polyline(pts, Color("c8a76c"), 56.0)
+		for p in pts:
+			draw_circle(p, 28.0, Color("c8a76c"))
+		draw_polyline(pts, Color("d6b87e"), 30.0)
+		for p in pts:
+			draw_circle(p, 15.0, Color("d6b87e"))
+		# 碎石与车辙点缀
+		rng.seed = 5
+		for i in 110:
+			var si := rng.randi_range(0, pts.size() - 2)
+			var p: Vector2 = pts[si].lerp(pts[si + 1], rng.randf())
+			var n := (pts[si + 1] - pts[si]).normalized().orthogonal()
+			p += n * rng.randf_range(-21.0, 21.0)
+			if rng.randf() < 0.7:
+				draw_circle(p, rng.randf_range(1.5, 3.5), Color(0.45, 0.34, 0.2, rng.randf_range(0.25, 0.5)))
+			else:
+				draw_circle(p, rng.randf_range(2.0, 4.0), Color(0.9, 0.8, 0.6, rng.randf_range(0.2, 0.4)))
+
+	func _draw_spots() -> void:
+		for i in main.build_spots.size():
+			var s: Vector2 = main.build_spots[i]
+			# 石板投影
+			draw_set_transform(s + Vector2(0, 5), 0.0, Vector2(0.95, 0.5))
+			draw_circle(Vector2.ZERO, 30.0, Color(0, 0, 0, 0.22))
 			draw_set_transform(s, 0.0, Vector2.ONE * 0.9)
 			draw_texture(main.TEX_SPOT, -main.TEX_SPOT.get_size() / 2.0)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		# 树木、灌木与石头装饰
+			# 悬停/选中高亮
+			if i == main.hovered_spot or i == main.selected_spot:
+				var sel: bool = i == main.selected_spot
+				var col := Color(1.0, 0.85, 0.4, 0.95) if sel else Color(1, 1, 1, 0.65)
+				draw_circle(s, 36.0, Color(1, 1, 0.85, 0.10 if sel else 0.06))
+				draw_arc(s, 34.0, 0.0, TAU, 40, col, 2.5 if sel else 1.8)
+
+	func _draw_deco() -> void:
 		var deco_tex: Array = [main.TEX_TREE, main.TEX_BUSH, main.TEX_BUSH_SMALL, main.TEX_PLANT,
 			main.TEX_ROCK1, main.TEX_ROCK2, main.TEX_ROCK3]
+		var rng := RandomNumberGenerator.new()
 		rng.seed = 7
 		for i in 80:
 			var p := Vector2(rng.randf_range(20, main.SCREEN.x - 20), rng.randf_range(20, main.SCREEN.y - 20))
@@ -218,28 +365,97 @@ class MapDrawer extends Node2D:
 			if near_spot:
 				continue
 			var tex: Texture2D = deco_tex[rng.randi_range(0, deco_tex.size() - 1)]
-			draw_set_transform(p, 0.0, Vector2.ONE * rng.randf_range(0.6, 1.1))
+			var sc := rng.randf_range(0.6, 1.1)
+			# 落地投影
+			draw_set_transform(p + Vector2(3, 7 * sc), 0.0, Vector2(sc, sc * 0.4))
+			draw_circle(Vector2.ZERO, tex.get_size().x * 0.32, Color(0, 0, 0, 0.2))
+			draw_set_transform(p, 0.0, Vector2.ONE * sc)
 			draw_texture(tex, -tex.get_size() / 2.0)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		# 出怪口
-		var spawn_pos := Vector2(10, pts[0].y)
-		draw_circle(spawn_pos, 34.0, Color("2e2e38"))
-		draw_arc(spawn_pos, 34.0, 0.0, TAU, 32, Color("55555f"), 3.0)
-		# 城堡
+
+	func _draw_portal() -> void:
+		var pts: PackedVector2Array = main.path_points
+		var sp := Vector2(6, pts[0].y)
+		# 洞口晕圈与深渊
+		draw_circle(sp, 54.0, Color(0.08, 0.06, 0.1, 0.25))
+		draw_circle(sp, 40.0, Color("241f2e"))
+		draw_circle(sp, 29.0, Color("151220"))
+		# 环绕的岩石圈
+		for k in 10:
+			var a := TAU * k / 10.0
+			var rp := sp + Vector2(cos(a), sin(a)) * 37.0
+			draw_circle(rp + Vector2(0, 3), 7.5, Color(0, 0, 0, 0.25))
+			draw_circle(rp, 7.0, Color("4a4550"))
+			draw_circle(rp + Vector2(0, -2), 4.5, Color("5f5a6a"))
+		# 内圈幽光
+		draw_arc(sp, 24.0, 0.0, TAU, 32, Color(0.5, 0.35, 0.7, 0.4), 2.0)
+
+	func _draw_castle() -> void:
 		var c: Vector2 = main.castle_pos
-		draw_rect(Rect2(c.x - 52, c.y - 70, 20, 85), Color("8a8a95"))
-		draw_rect(Rect2(c.x + 32, c.y - 70, 20, 85), Color("8a8a95"))
-		draw_rect(Rect2(c.x - 40, c.y - 55, 80, 70), Color("9a9aa5"))
-		draw_colored_polygon(PackedVector2Array([Vector2(c.x - 54, c.y - 70), Vector2(c.x - 30, c.y - 70), Vector2(c.x - 42, c.y - 92)]), Color("b03a2e"))
-		draw_colored_polygon(PackedVector2Array([Vector2(c.x + 30, c.y - 70), Vector2(c.x + 54, c.y - 70), Vector2(c.x + 42, c.y - 92)]), Color("b03a2e"))
-		for k in 4:
-			draw_rect(Rect2(c.x - 36 + k * 20, c.y - 63, 10, 10), Color("9a9aa5"))
-		draw_rect(Rect2(c.x - 12, c.y - 20, 24, 35), Color("4a3320"))
+		var stone := Color("b5ae9f")
+		var stone_dark := Color("9a9284")
+		var stone_edge := Color("6e675c")
+		var seam := Color(stone_edge.r, stone_edge.g, stone_edge.b, 0.35)
+		# 地面阴影
+		draw_set_transform(c + Vector2(0, 32), 0.0, Vector2(1.0, 0.35))
+		draw_circle(Vector2.ZERO, 82.0, Color(0, 0, 0, 0.25))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# 两侧后塔（先画，位于墙体后面）
+		for sx in [-1.0, 1.0]:
+			var tx: float = c.x + sx * 54.0
+			draw_rect(Rect2(tx - 16, c.y - 96, 32, 112), stone_dark)
+			for k in 3:
+				draw_rect(Rect2(tx - 16 + k * 12, c.y - 108, 8, 14), stone_dark)
+			draw_rect(Rect2(tx - 16, c.y - 96, 32, 3), Color(stone_edge.r, stone_edge.g, stone_edge.b, 0.5))
+		# 主墙体 + 砖缝
+		draw_rect(Rect2(c.x - 46, c.y - 62, 92, 80), stone)
+		for row in 6:
+			var yy := c.y - 56 + row * 12
+			draw_rect(Rect2(c.x - 46, yy, 92, 1.5), seam)
+			var off := 0.0 if row % 2 == 0 else 11.0
+			for kx in 5:
+				draw_rect(Rect2(c.x - 46 + off + kx * 22, yy, 1.5, 12), seam)
+		# 墙顶雉堞
+		for k in 5:
+			draw_rect(Rect2(c.x - 46 + k * 20, c.y - 72, 12, 12), stone)
+			draw_rect(Rect2(c.x - 46 + k * 20, c.y - 72, 12, 3), Color(0.95, 0.93, 0.88, 0.5))
+		draw_rect(Rect2(c.x - 46, c.y - 62, 92, 3), stone_edge)
+		# 城门（拱形木门 + 门框）
+		draw_circle(Vector2(c.x, c.y - 22), 15.0, Color("3c2a18"))
+		draw_rect(Rect2(c.x - 15, c.y - 22, 30, 40), Color("3c2a18"))
+		draw_circle(Vector2(c.x, c.y - 22), 12.5, Color("5a4026"))
+		draw_rect(Rect2(c.x - 12.5, c.y - 22, 25, 37), Color("5a4026"))
+		for k in 3:
+			draw_line(Vector2(c.x - 12 + k * 9, c.y - 20), Vector2(c.x - 12 + k * 9, c.y + 16), Color("3c2a18"), 1.5)
+		# 旗帜
+		for sx in [-1.0, 1.0]:
+			var fx: float = c.x + sx * 54.0
+			draw_line(Vector2(fx, c.y - 106), Vector2(fx, c.y - 132), Color("5c4a33"), 2.5)
+			draw_colored_polygon(PackedVector2Array([Vector2(fx, c.y - 132), Vector2(fx + sx * 20.0, c.y - 125), Vector2(fx, c.y - 118)]), Color("b03a2e"))
+			draw_circle(Vector2(fx, c.y - 133), 2.5, Color("f1c40f"))
+
+	func _draw_overlays() -> void:
 		# 选中塔的射程预览
 		if main.selected_spot >= 0 and main.towers.has(main.selected_spot):
 			var t = main.towers[main.selected_spot]
-			draw_circle(t.position, t.current_range, Color(1, 1, 1, 0.10))
-			draw_arc(t.position, t.current_range, 0.0, TAU, 64, Color(1, 1, 1, 0.45), 2.0)
+			draw_circle(t.position, t.current_range, Color(1, 1, 1, 0.08))
+			draw_arc(t.position, t.current_range, 0.0, TAU, 96, Color(1, 1, 1, 0.55), 2.0)
+			draw_arc(t.position, t.current_range - 6.0, 0.0, TAU, 96, Color(1, 1, 1, 0.18), 1.5)
+		# 兵营集合点旗帜（选中兵营或拾取集合点时显示）
+		var rally_tower: Node2D = null
+		if main.rally_pick_tower != null and is_instance_valid(main.rally_pick_tower):
+			rally_tower = main.rally_pick_tower
+		elif main.selected_spot >= 0 and main.towers.has(main.selected_spot) \
+				and main.towers[main.selected_spot].type == "barracks":
+			rally_tower = main.towers[main.selected_spot]
+		if rally_tower != null:
+			var rp: Vector2 = rally_tower.rally_point
+			draw_line(rally_tower.position, rp, Color(0.5, 0.75, 1.0, 0.45), 2.0)
+			draw_arc(rp, 85.0, 0.0, TAU, 48, Color(0.55, 0.75, 1.0, 0.3), 1.5)
+			draw_circle(rp, 10.0, Color(0.4, 0.65, 1.0, 0.22))
+			draw_arc(rp, 12.0, 0.0, TAU, 24, Color(0.6, 0.8, 1.0, 0.9), 2.0)
+			draw_line(rp + Vector2(0, 2), rp + Vector2(0, -16), Color("c8d8e8"), 2.0)
+			draw_colored_polygon(PackedVector2Array([rp + Vector2(0, -16), rp + Vector2(12, -12), rp + Vector2(0, -8)]), Color("4a80d0"))
 
 
 func _ready() -> void:
@@ -256,10 +472,37 @@ func _ready() -> void:
 	map_drawer = MapDrawer.new()
 	map_drawer.main = self
 	add_child(map_drawer)
+	# 边缘暗角：独立全屏层（轻微压暗四角，聚焦画面中心），位于地图之上、UI 之下
+	var vshader := Shader.new()
+	vshader.code = """
+shader_type canvas_item;
+void fragment() {
+	vec2 uv = SCREEN_UV - vec2(0.5);
+	uv.x *= 1.78;
+	float v = smoothstep(0.42, 0.95, length(uv) * 1.25);
+	COLOR = vec4(0.03, 0.06, 0.02, v * 0.38);
+}
+"""
+	var vignette_layer := CanvasLayer.new()
+	vignette_layer.layer = 5
+	add_child(vignette_layer)
+	var vignette := ColorRect.new()
+	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var vmat := ShaderMaterial.new()
+	vmat.shader = vshader
+	vignette.material = vmat
+	vignette_layer.add_child(vignette)
+	# 相机：用于受击/爆炸时的屏幕震动
+	camera = Camera2D.new()
+	camera.position = SCREEN / 2.0
+	add_child(camera)
+	camera.make_current()
 	_build_ui()
 	_setup_music()
+	_setup_sfx()
 	_update_hud()
-	hint_label.text = "第 %d 关 · %s" % [level_index + 1, level_name]
+	hint_label.text = "第 %d 关 · %s　|　%s" % [level_index + 1, level_name, _wave_preview_text()]
 	if smoke_test:
 		# 顺带覆盖调试功能路径
 		_cycle_speed()
@@ -276,18 +519,37 @@ func _ready() -> void:
 		_build_tower(0, "archer")
 		_build_tower(4, "mage")
 		_build_tower(1, "cannon")
+		_build_tower(2, "barracks")
 		for i in 2:
 			_upgrade_tower(0)
 			_upgrade_tower(4)
 			_upgrade_tower(1)
+			_upgrade_tower(2)
 		_close_menu()
 		_update_hud()
+		# 在兵营集合点旁放一个重甲武士，让士兵当场接敌（物理抗性耐久，方便截图）
+		var bt = towers[2]
+		var blocker: Node2D = null
+		if not OS.get_cmdline_user_args().has("--no-blocker"):
+			blocker = Enemy.new()
+			blocker.setup("knight", path_points, ENEMY_TYPES["knight"], 1.0)
+			var target_p: Vector2 = bt.rally_point + Vector2(30, 0)
+			var best_d := INF
+			for i in path_points.size() - 1:
+				var cp := Geometry2D.get_closest_point_to_segment(target_p, path_points[i], path_points[i + 1])
+				var d := cp.distance_to(target_p)
+				if d < best_d:
+					best_d = d
+					blocker.seg = i
+					blocker.seg_progress = path_points[i].distance_to(cp)
+			add_child(blocker)
+			blocker.position = target_p
 		start_wave()
 		spawn_enemy("ogre")
 		await get_tree().create_timer(0.8).timeout
 		spawn_enemy("orc")
 		await get_tree().create_timer(0.8).timeout
-		spawn_enemy("wolf")
+		spawn_enemy("saucer")
 		# 慢速测试弹，便于截图确认弹道可见
 		var first_enemy = get_tree().get_nodes_in_group("enemies")[0]
 		for i in 3:
@@ -303,6 +565,12 @@ func _ready() -> void:
 		await get_tree().create_timer(0.18).timeout
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("/tmp/tafang_shot.png")
+		# 敌人属性面板（抗性展示）
+		if is_instance_valid(blocker):
+			_open_enemy_menu(blocker)
+			await get_tree().create_timer(0.2).timeout
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("/tmp/tafang_enemy_info.png")
 		# 建造/升级菜单界面
 		_open_menu(2)
 		await get_tree().create_timer(0.2).timeout
@@ -339,32 +607,44 @@ func _load_level(idx: int) -> void:
 
 
 func _compose_waves(count: int, budget0: float) -> Array:
-	# 参数化波次生成：预算随波次指数增长，后期加入食人魔
+	# 参数化波次生成：预算随波次指数增长；敌人类型按波次逐步解锁，
+	# share 为该类型在当波预算中的占比，boss 只出现在最后两波
+	var schedule := [
+		["grunt", 0, 0.30, 7.0, 20],
+		["sapper", 1, 0.14, 6.0, 14],
+		["saucer", 2, 0.10, 8.0, 10],
+		["orc", 2, 0.26, 20.0, 10],
+		["shaman", 3, 0.20, 24.0, 8],
+		["recon", 4, 0.10, 9.0, 10],
+		["knight", 4, 0.22, 30.0, 7],
+		["phantom", 5, 0.14, 26.0, 8],
+		["raider", 5, 0.18, 30.0, 6],
+		["bomber", 6, 0.14, 34.0, 5],
+	]
 	var result := []
-	var costs := {"grunt": 7.0, "wolf": 6.0, "orc": 20.0, "ogre": 130.0}
 	for w in count:
 		var budget := budget0 * pow(1.26, w)
 		var groups := []
+		# 最后两波加入 boss
 		if w >= count - 2:
 			var ogre_n := 1 + int(w == count - 1)
-			budget -= costs["ogre"] * ogre_n
+			budget -= 130.0 * ogre_n
 			groups.append({"type": "ogre", "count": ogre_n, "interval": 2.5})
-		var orc_n := 0
-		var wolf_n := 0
-		if w >= 2:
-			orc_n = mini(int(budget * 0.4 / costs["orc"]), 12)
-			budget -= orc_n * costs["orc"]
-		if w >= 1:
-			wolf_n = mini(int(budget * 0.35 / costs["wolf"]), 12)
-			budget -= wolf_n * costs["wolf"]
-		var grunt_n := mini(int(budget / costs["grunt"]), 24)
-		if grunt_n > 0:
-			groups.append({"type": "grunt", "count": grunt_n, "interval": maxf(0.4, 1.0 - w * 0.05),
-				"delay": 0.0 if groups.is_empty() else 2.0})
-		if wolf_n > 0:
-			groups.append({"type": "wolf", "count": wolf_n, "interval": 0.5, "delay": 2.0})
-		if orc_n > 0:
-			groups.append({"type": "orc", "count": orc_n, "interval": 0.9, "delay": 2.0})
+		if w == count - 1:
+			budget -= 150.0
+			groups.append({"type": "troll", "count": 1, "interval": 2.5, "delay": 4.0})
+		var delay := 0.0
+		for entry in schedule:
+			var unlock: int = entry[1]
+			if w < unlock:
+				continue
+			var cost: float = entry[3]
+			var n := mini(int(budget * entry[2] / cost), entry[4])
+			if n <= 0:
+				continue
+			groups.append({"type": entry[0], "count": n, "interval": maxf(0.45, 1.1 - w * 0.05),
+				"delay": delay})
+			delay += 2.0
 		result.append(groups)
 	return result
 
@@ -372,6 +652,18 @@ func _compose_waves(count: int, budget0: float) -> Array:
 func _process(delta: float) -> void:
 	if game_ended:
 		return
+	# 敌人信息面板：跟随生命变化，敌人死亡/离场自动关闭
+	if selected_enemy != null:
+		if is_instance_valid(selected_enemy) and not selected_enemy.dead:
+			_update_enemy_panel()
+		else:
+			_close_menu()
+	# 屏幕震动衰减
+	if shake_amp > 0.03:
+		shake_amp = lerpf(shake_amp, 0.0, minf(1.0, delta * 9.0))
+		camera.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_amp
+	else:
+		camera.offset = Vector2.ZERO
 	if wave_active:
 		wave_time += delta
 		while not spawn_events.is_empty() and spawn_events[0]["time"] <= wave_time:
@@ -394,13 +686,67 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if game_ended:
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseMotion:
+		# 悬停建造点高亮 + 手型光标
+		var idx := _spot_at(get_global_mouse_position())
+		if idx != hovered_spot:
+			hovered_spot = idx
+			map_drawer.queue_redraw()
+		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if idx >= 0 else Input.CURSOR_ARROW)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var pos := get_global_mouse_position()
+		# 兵营集合点拾取模式：点道路生效，点其他位置取消
+		if rally_pick_tower != null:
+			if is_instance_valid(rally_pick_tower) and dist_to_path(pos) <= 60.0:
+				var nr := _nearest_path_point(pos)
+				rally_pick_tower.set_rally(nr["pt"], nr["dir"])
+				play_sfx("build")
+				hint_label.text = "集合点已更新"
+			else:
+				hint_label.text = "已取消"
+			rally_pick_tower = null
+			map_drawer.queue_redraw()
+			return
+		# 点击敌人：查看属性与抗性
+		var e := _enemy_at(pos)
+		if e != null:
+			_open_enemy_menu(e)
+			return
 		var idx := _spot_at(pos)
 		if idx >= 0:
 			_open_menu(idx)
 		else:
 			_close_menu()
+
+
+func _enemy_at(pos: Vector2) -> Node2D:
+	var best: Node2D = null
+	var best_d := 30.0
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(e) or e.dead:
+			continue
+		var c: Vector2 = e.global_position + Vector2(0, -e.FLY_HEIGHT if e.flying else 0.0)
+		var d: float = c.distance_to(pos)
+		if d < best_d:
+			best_d = d
+			best = e
+	return best
+
+
+func _nearest_path_point(p: Vector2) -> Dictionary:
+	var best_pt := Vector2.ZERO
+	var best_d := INF
+	var best_dir := Vector2.RIGHT
+	for i in path_points.size() - 1:
+		var a := path_points[i]
+		var b := path_points[i + 1]
+		var cp := Geometry2D.get_closest_point_to_segment(p, a, b)
+		var d := p.distance_to(cp)
+		if d < best_d:
+			best_d = d
+			best_pt = cp
+			best_dir = (b - a).normalized()
+	return {"pt": best_pt, "dir": best_dir}
 
 
 # ---------- 波次 ----------
@@ -426,12 +772,12 @@ func start_wave() -> void:
 	wave_timer_bar.visible = false
 	start_button.disabled = true
 	start_button.text = "第 %d 波进攻中…" % next_wave
-	hint_label.text = ""
+	hint_label.text = "第 %d 波来袭！" % next_wave
 	_update_hud()
 
 
 func _smoke_build() -> void:
-	var order := ["archer", "cannon", "mage"]
+	var order := ["archer", "cannon", "mage", "barracks"]
 	var n := 0
 	for i in build_spots.size():
 		if towers.has(i):
@@ -455,7 +801,7 @@ func _end_wave() -> void:
 	gold += bonus
 	start_button.disabled = false
 	start_button.text = "开始第 %d 波" % (next_wave + 1)
-	hint_label.text = "守住了！奖励 %d 金币" % bonus
+	hint_label.text = "守住了！奖励 %d 金币　|　%s" % [bonus, _wave_preview_text()]
 	# 启动自动开波倒计时
 	wave_cooldown = WAVE_COOLDOWN
 	wave_timer_bar.value = 0.0
@@ -473,6 +819,7 @@ func spawn_enemy(type_name: String) -> void:
 
 func _on_enemy_died(e) -> void:
 	gold += e.reward
+	play_sfx("coin")
 	spawn_particles(e.global_position, {"texture": FX_SMOKE2, "count": 10, "speed": 80.0,
 		"size": 0.08, "gravity": 20.0, "lifetime": 0.8, "grow": 1.8,
 		"turb_strength": 1.5, "rand_angle": true,
@@ -483,6 +830,8 @@ func _on_enemy_died(e) -> void:
 
 func _on_enemy_reached_end(e) -> void:
 	lives = maxi(0, lives - e.damage)
+	play_sfx("leak")
+	shake_amp = maxf(shake_amp, 9.0)
 	_flash_red()
 	_update_hud()
 	if lives <= 0:
@@ -520,23 +869,45 @@ func _open_menu(idx: int) -> void:
 		title.add_theme_font_size_override("font_size", 18)
 		title.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
 		vbox.add_child(title)
+		# 当前属性一览
+		var stats := Label.new()
+		stats.text = _tower_stats_text(t)
+		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		stats.add_theme_font_size_override("font_size", 13)
+		stats.add_theme_color_override("font_color", Color(0.82, 0.85, 0.78))
+		vbox.add_child(stats)
 		if t.level < 3:
 			var up_btn := Button.new()
 			up_btn.text = "升级（%d 金）" % t.upgrade_cost()
-			up_btn.custom_minimum_size = Vector2(150, 36)
+			up_btn.custom_minimum_size = Vector2(170, 36)
 			up_btn.disabled = gold < t.upgrade_cost()
 			_style_button(up_btn)
 			up_btn.pressed.connect(_upgrade_tower.bind(idx))
 			vbox.add_child(up_btn)
+			menu_buttons.append([up_btn, t.upgrade_cost()])
+			# 升级预览：数值变化一目了然
+			var preview := Label.new()
+			preview.text = _tower_upgrade_preview(t)
+			preview.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			preview.add_theme_font_size_override("font_size", 12)
+			preview.add_theme_color_override("font_color", Color("8fd35f"))
+			vbox.add_child(preview)
 		else:
 			var max_label := Label.new()
 			max_label.text = "已满级"
 			max_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			max_label.add_theme_color_override("font_color", Color(0.95, 0.93, 0.85))
 			vbox.add_child(max_label)
+		if t.type == "barracks":
+			var rally_btn := Button.new()
+			rally_btn.text = "移动集合点"
+			rally_btn.custom_minimum_size = Vector2(170, 32)
+			_style_button(rally_btn)
+			rally_btn.pressed.connect(_start_rally_pick.bind(idx))
+			vbox.add_child(rally_btn)
 		var sell_btn := Button.new()
 		sell_btn.text = "出售（+%d 金）" % t.sell_value()
-		sell_btn.custom_minimum_size = Vector2(150, 36)
+		sell_btn.custom_minimum_size = Vector2(170, 36)
 		_style_button(sell_btn)
 		sell_btn.pressed.connect(_sell_tower.bind(idx))
 		vbox.add_child(sell_btn)
@@ -544,12 +915,13 @@ func _open_menu(idx: int) -> void:
 		for key in TOWER_TYPES:
 			var d: Dictionary = TOWER_TYPES[key]
 			var btn := Button.new()
-			btn.text = "%s  %d 金" % [d["name"], d["cost"]]
-			btn.custom_minimum_size = Vector2(150, 36)
+			btn.text = "%s  %d 金\n%s" % [d["name"], d["cost"], TOWER_ROLE[key]]
+			btn.custom_minimum_size = Vector2(170, 48)
 			btn.disabled = gold < d["cost"]
 			_style_button(btn)
 			btn.pressed.connect(_build_tower.bind(idx, key))
 			vbox.add_child(btn)
+			menu_buttons.append([btn, d["cost"]])
 	ui_root.add_child(menu_panel)
 	# 菜单定位在建造点旁，并夹在屏幕内
 	menu_panel.reset_size()
@@ -561,12 +933,112 @@ func _open_menu(idx: int) -> void:
 	menu_panel.size = size
 
 
+## 点击敌人：显示生命/速度/赏金与抗性面板
+func _open_enemy_menu(e: Node2D) -> void:
+	_close_menu()
+	selected_enemy = e
+	e.selected = true
+	map_drawer.queue_redraw()
+	menu_panel = PanelContainer.new()
+	var pstyle := _panel_style(Color(0.10, 0.11, 0.14, 0.92), Color(0.65, 0.75, 0.9, 0.9), 12)
+	pstyle.content_margin_left = 12
+	pstyle.content_margin_right = 12
+	pstyle.content_margin_top = 8
+	pstyle.content_margin_bottom = 8
+	menu_panel.add_theme_stylebox_override("panel", pstyle)
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	menu_panel.add_child(vbox)
+	var data: Dictionary = ENEMY_TYPES[e.type]
+	var title := Label.new()
+	title.text = ENEMY_NAMES.get(e.type, e.type)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
+	vbox.add_child(title)
+	enemy_hp_label = Label.new()
+	enemy_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	enemy_hp_label.add_theme_font_size_override("font_size", 13)
+	enemy_hp_label.add_theme_color_override("font_color", Color("8fd35f"))
+	vbox.add_child(enemy_hp_label)
+	enemy_info_labels.clear()
+	for line in _enemy_info_lines(e):
+		var l := Label.new()
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.add_theme_font_size_override("font_size", 13)
+		l.add_theme_color_override("font_color", line[1])
+		l.text = line[0]
+		vbox.add_child(l)
+		enemy_info_labels.append(l)
+	ui_root.add_child(menu_panel)
+	menu_panel.reset_size()
+	var size := menu_panel.get_combined_minimum_size()
+	var pos: Vector2 = e.global_position + Vector2(34, -size.y / 2.0)
+	pos.x = clampf(pos.x, 8.0, SCREEN.x - size.x - 8.0)
+	pos.y = clampf(pos.y, 8.0, SCREEN.y - size.y - 8.0)
+	menu_panel.position = pos
+	menu_panel.size = size
+	_update_enemy_panel()
+
+
+func _enemy_info_lines(e: Node2D) -> Array:
+	var data: Dictionary = ENEMY_TYPES[e.type]
+	var lines: Array = []
+	var speed_txt: String = "飞行 %.0f" % e.speed if e.flying else "速度 %.0f" % e.speed
+	lines.append([speed_txt + " · 赏金 %d" % e.reward, Color(0.82, 0.85, 0.78)])
+	# 抗性：只显示非中性项
+	var armor: Dictionary = e.armor
+	var parts: Array = []
+	if armor.get("physical", 1.0) != 1.0:
+		var m: float = armor["physical"]
+		parts.append("物理 ×%.2f" % m)
+	if armor.get("magic", 1.0) != 1.0:
+		var m2: float = armor["magic"]
+		parts.append("魔法 ×%.2f" % m2)
+	if parts.is_empty():
+		lines.append(["无特殊抗性", Color(0.7, 0.72, 0.68)])
+	else:
+		lines.append([" · ".join(parts), Color("9b7fe8")])
+	if e.flying:
+		lines.append(["飞行单位：士兵无法拦截", Color("7fb8e8")])
+	return lines
+
+
+func _update_enemy_panel() -> void:
+	if selected_enemy == null or not is_instance_valid(selected_enemy):
+		return
+	enemy_hp_label.text = "生命 %d / %d" % [ceili(selected_enemy.hp), int(selected_enemy.max_hp)]
+
+
+func _start_rally_pick(idx: int) -> void:
+	var t = towers.get(idx)
+	if t == null or t.type != "barracks":
+		return
+	rally_pick_tower = t
+	_close_menu_keep_rally()
+	hint_label.text = "点击道路任意位置设置集合点（点空处取消）"
+	map_drawer.queue_redraw()
+
+
 func _close_menu() -> void:
 	if menu_panel != null:
 		menu_panel.queue_free()
 		menu_panel = null
+	menu_buttons.clear()
+	enemy_hp_label = null
+	if selected_enemy != null:
+		if is_instance_valid(selected_enemy):
+			selected_enemy.selected = false
+		selected_enemy = null
 	selected_spot = -1
 	map_drawer.queue_redraw()
+
+
+func _close_menu_keep_rally() -> void:
+	# 关闭面板但保留集合点拾取状态
+	var keep := rally_pick_tower
+	_close_menu()
+	rally_pick_tower = keep
 
 
 func _build_tower(idx: int, key: String) -> void:
@@ -574,9 +1046,14 @@ func _build_tower(idx: int, key: String) -> void:
 	if gold < d["cost"]:
 		return
 	gold -= d["cost"]
+	play_sfx("build")
 	var t = Tower.new()
 	t.setup(key, d)
 	t.position = build_spots[idx]
+	if key == "barracks":
+		# 兵营：集合点默认取离塔最近的道路点
+		var nr := _nearest_path_point(t.position)
+		t.set_rally(nr["pt"], nr["dir"])
 	t.fired.connect(_on_tower_fired)
 	add_child(t)
 	towers[idx] = t
@@ -597,6 +1074,7 @@ func _upgrade_tower(idx: int) -> void:
 		return
 	gold -= t.upgrade_cost()
 	t.apply_upgrade()
+	play_sfx("upgrade")
 	spawn_particles(t.position, {"texture": FX_STAR, "color": Color("f7dc6f"), "count": 10,
 		"speed": 130.0, "size": 0.06, "gravity": 40.0, "lifetime": 0.7, "add": true,
 		"rand_angle": true, "spin": 120.0})
@@ -618,13 +1096,14 @@ func _sell_tower(idx: int) -> void:
 func _on_tower_fired(tower, target) -> void:
 	if smoke_test:
 		smoke_shots[tower.type] = smoke_shots.get(tower.type, 0) + 1
+	play_sfx("shoot" if tower.type == "archer" else "shoot_" + tower.type)
 	# 炮口焰
 	var dir: Vector2 = (target.global_position - tower.global_position).normalized()
 	spawn_particles(tower.global_position + dir * 30.0, {"texture": FX_MUZZLE,
 		"color": Color(1, 0.9, 0.6), "count": 1, "speed": 0.0, "size": 0.075,
 		"lifetime": 0.12, "add": true, "gravity": 0.0, "angle_deg": rad_to_deg(dir.angle()) + 90.0})
 	var p = Projectile.new()
-	p.setup(tower.global_position, target, tower.proj_speed, tower.current_damage, tower.splash, tower.proj_tex, tower.proj_size, tower.hit_tex, tower.hit_size)
+	p.setup(tower.global_position, target, tower.proj_speed, tower.current_damage, tower.splash, tower.proj_tex, tower.proj_size, tower.hit_tex, tower.hit_size, tower.damage_type)
 	add_child(p)
 
 
@@ -788,7 +1267,10 @@ class ShockRing extends Node2D:
 func spawn_float_text(pos: Vector2, text: String, color: Color) -> void:
 	var l := Label.new()
 	l.text = text
+	l.add_theme_font_size_override("font_size", 17)
 	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", Color(0.12, 0.07, 0.0, 0.9))
+	l.add_theme_constant_override("outline_size", 5)
 	l.position = pos + Vector2(-15, -30)
 	ui_root.add_child(l)
 	var tw := l.create_tween()
@@ -812,6 +1294,50 @@ func _flash_red() -> void:
 
 # ---------- 工具 ----------
 
+const DMG_TYPE_NAMES := {"physical": "物理", "magic": "魔法"}
+
+
+func _tower_stats_text(t) -> String:
+	var lv: Dictionary = TOWER_TYPES[t.type]["levels"][t.level - 1]
+	if t.type == "barracks":
+		return "士兵 ×%d · 生命 %d · 攻击 %d（物理）\n补兵 %d 秒 · 在集合点拦截敌人" % [
+			lv["soldiers"], int(lv["soldier_hp"]), int(lv["soldier_dmg"]), int(lv["respawn"])]
+	var text := "伤害 %d · 攻速 %.1f/秒 · 射程 %d\n%s伤害" % [lv["damage"], 1.0 / lv["rate"], int(lv["range"]), DMG_TYPE_NAMES[t.damage_type]]
+	if lv.has("splash"):
+		text += " · 溅射半径 %d" % int(lv["splash"])
+	return text
+
+
+func _tower_upgrade_preview(t) -> String:
+	var levels: Array = TOWER_TYPES[t.type]["levels"]
+	var cur: Dictionary = levels[t.level - 1]
+	var nxt: Dictionary = levels[t.level]
+	if t.type == "barracks":
+		return "士兵 %d→%d · 生命 %d→%d · 攻击 %d→%d" % [cur["soldiers"], nxt["soldiers"],
+			int(cur["soldier_hp"]), int(nxt["soldier_hp"]), int(cur["soldier_dmg"]), int(nxt["soldier_dmg"])]
+	var parts := ["伤害 %d→%d" % [cur["damage"], nxt["damage"]],
+		"DPS %.0f→%.0f" % [cur["damage"] / cur["rate"], nxt["damage"] / nxt["rate"]],
+		"射程 %d→%d" % [int(cur["range"]), int(nxt["range"])]]
+	if nxt.has("splash"):
+		parts.append("溅射 %d→%d" % [int(cur.get("splash", 0.0)), int(nxt["splash"])])
+	return " · ".join(parts)
+
+
+func _wave_preview_text() -> String:
+	# 下一波构成预告："第 1 波：哥布林x6"（生成波次按类型归并数量）
+	if next_wave >= waves.size():
+		return ""
+	var counts := {}
+	for group in waves[next_wave]:
+		var ty: String = group["type"]
+		counts[ty] = counts.get(ty, 0) + int(group["count"])
+	var parts: Array = []
+	for ty in counts:
+		parts.append("%s×%d" % [ENEMY_NAMES.get(ty, ty), counts[ty]])
+	parts.sort()
+	return "第 %d 波：%s" % [next_wave + 1, " ".join(parts)]
+
+
 func _setup_music() -> void:
 	var stream = load("res://assets/audio/the_builder.mp3")
 	if stream == null:
@@ -823,6 +1349,184 @@ func _setup_music() -> void:
 	music_player.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(music_player)
 	music_player.play()
+
+
+# ---------- 音效（程序化合成，无外部素材依赖） ----------
+
+## 运行时合成 16-bit 单声道 WAV：开火/爆炸/建造/金币/警报/胜负等短音效
+func _setup_sfx() -> void:
+	sfx_streams["shoot"] = _synth_shoot()
+	sfx_streams["shoot_mage"] = _synth_mage()
+	sfx_streams["shoot_cannon"] = _synth_cannon()
+	sfx_streams["hit"] = _synth_hit()
+	sfx_streams["explosion"] = _synth_explosion()
+	sfx_streams["build"] = _synth_build()
+	sfx_streams["upgrade"] = _synth_notes([659.0, 880.0], 0.09, 0.32)
+	sfx_streams["coin"] = _synth_notes([1319.0, 1760.0], 0.07, 0.25)
+	sfx_streams["leak"] = _synth_leak()
+	sfx_streams["win"] = _synth_notes([523.0, 659.0, 784.0, 1046.0], 0.17, 0.42)
+	sfx_streams["lose"] = _synth_notes([392.0, 311.0, 233.0], 0.28, 0.42)
+	for i in 8:
+		var p := AudioStreamPlayer.new()
+		p.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(p)
+		sfx_pool.append(p)
+
+
+func play_sfx(sfx_name: String, pitch_lo := 0.94, pitch_hi := 1.06) -> void:
+	if not sfx_streams.has(sfx_name):
+		return
+	var p: AudioStreamPlayer = sfx_pool[sfx_idx]
+	sfx_idx = (sfx_idx + 1) % sfx_pool.size()
+	p.stream = sfx_streams[sfx_name]
+	p.pitch_scale = randf_range(pitch_lo, pitch_hi)
+	p.play()
+
+
+const SFX_RATE := 22050
+
+
+func _to_wav(data: PackedByteArray) -> AudioStreamWAV:
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = SFX_RATE
+	wav.stereo = false
+	wav.data = data
+	return wav
+
+
+func _wav_buffer(duration: float) -> PackedByteArray:
+	var data := PackedByteArray()
+	data.resize(int(duration * SFX_RATE) * 2)
+	return data
+
+
+func _put_sample(data: PackedByteArray, i: int, v: float) -> void:
+	data.encode_s16(i * 2, int(clampf(v, -1.0, 1.0) * 32000.0))
+
+
+func _synth_shoot() -> AudioStreamWAV:
+	# 箭矢"咻"：正弦快速下滑 + 短衰减
+	var dur := 0.09
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		var f := lerpf(900.0, 280.0, t01)
+		var v := sin(t * f * TAU) * exp(-t01 * 6.5) * 0.38
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_mage() -> AudioStreamWAV:
+	# 奥术"咻嗡"：上升扫频 + 五度泛音
+	var dur := 0.22
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		var f := lerpf(260.0, 1250.0, t01 * t01)
+		var env := exp(-t01 * 3.5) * minf(t01 * 12.0, 1.0)
+		var v := (sin(t * f * TAU) + 0.4 * sin(t * f * 1.5 * TAU)) * env * 0.3
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_cannon() -> AudioStreamWAV:
+	# 炮击低频"咚"：下滑正弦 + 噪声冲击
+	var dur := 0.16
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	var rng := RandomNumberGenerator.new()
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		var f := lerpf(150.0, 55.0, t01)
+		var env := exp(-t01 * 5.0)
+		var v := sin(t * f * TAU) * env * 0.8
+		v += rng.randf_range(-1, 1) * env * env * 0.35
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_hit() -> AudioStreamWAV:
+	# 命中轻响：短噪声敲击
+	var dur := 0.05
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	var rng := RandomNumberGenerator.new()
+	for i in n:
+		var t01 := float(i) / n
+		var v := rng.randf_range(-1, 1) * exp(-t01 * 9.0) * 0.3
+		v += sin(float(i) / SFX_RATE * 520.0 * TAU) * exp(-t01 * 10.0) * 0.2
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_explosion() -> AudioStreamWAV:
+	# 爆炸：低通噪声轰鸣 + 低频震荡
+	var dur := 0.5
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	var rng := RandomNumberGenerator.new()
+	var lp := 0.0
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		lp += (rng.randf_range(-1, 1) - lp) * 0.09
+		var env := exp(-t01 * 5.5)
+		var v := lp * env * 1.1
+		v += sin(t * (80.0 - 40.0 * t01) * TAU) * env * 0.4
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_build() -> AudioStreamWAV:
+	# 建造落锤：木头敲击双击
+	var dur := 0.18
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		var knock := fmod(t01, 0.09) < 0.045
+		var env := exp(-(fmod(t01, 0.09)) * 16.0) if knock else 0.0
+		var v := sin(t * 190.0 * TAU) * env * 0.55
+		v += sin(t * 95.0 * TAU) * env * 0.3
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_leak() -> AudioStreamWAV:
+	# 漏怪警报：低频方波蜂鸣带颤音
+	var dur := 0.32
+	var data := _wav_buffer(dur)
+	var n := data.size() / 2
+	for i in n:
+		var t01 := float(i) / n
+		var t := float(i) / SFX_RATE
+		var env := exp(-t01 * 3.0)
+		var sq := 1.0 if fmod(t * 190.0, 1.0) < 0.5 else -1.0
+		var v := sq * env * (0.75 + 0.25 * sin(t * TAU * 9.0)) * 0.22
+		_put_sample(data, i, v)
+	return _to_wav(data)
+
+
+func _synth_notes(notes: Array, note_dur: float, amp := 0.4) -> AudioStreamWAV:
+	# 依次演奏的音符序列（升级/金币/胜负）
+	var total := int(note_dur * notes.size() * SFX_RATE)
+	var data := _wav_buffer(float(total) / SFX_RATE)
+	for i in total:
+		var t := float(i) / SFX_RATE
+		var ni := mini(int(t / note_dur), notes.size() - 1)
+		var ft := fmod(t, note_dur)
+		var env := minf(ft * 40.0, 1.0) * exp(-ft * 5.0)
+		var f: float = notes[ni]
+		var v := (sin(t * f * TAU) + 0.25 * sin(t * f * 2.0 * TAU)) * env * amp
+		_put_sample(data, i, v)
+	return _to_wav(data)
 
 
 func dist_to_path(p: Vector2) -> float:
@@ -1096,6 +1800,10 @@ func _debug_toggle_music() -> void:
 
 
 func _update_hud() -> void:
+	# 打开中的建造/升级菜单随金币实时刷新可用状态
+	for pair in menu_buttons:
+		if is_instance_valid(pair[0]):
+			pair[0].disabled = gold < int(pair[1])
 	if gold != last_gold:
 		gold_label.text = str(gold)
 		if last_gold >= 0:
@@ -1117,11 +1825,13 @@ func _update_hud() -> void:
 
 func game_over(win: bool) -> void:
 	game_ended = true
+	play_sfx("win" if win else "lose")
 	if smoke_test:
 		print("[smoke] game over win=%s gold=%d lives=%d towers=%d shots=%s" % [win, gold, lives, towers.size(), str(smoke_shots)])
 	_close_menu()
 	var earned := 0
-	if win:
+	if win and not smoke_test:
+		# 冒烟测试不写存档，避免污染真实进度
 		earned = GameState.complete_level(level_index, lives)
 	get_tree().paused = true
 	var panel := PanelContainer.new()
