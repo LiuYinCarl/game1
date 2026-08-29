@@ -31,10 +31,10 @@ func setup(tower_ref: Node2D, rally_pos: Vector2, slot_off: Vector2, s_hp: float
 	sprite.texture = preload("res://assets/spire/soldier_wisp.png")
 	sprite.hframes = 4
 	sprite.modulate = tint
-	sprite.scale = Vector2.ONE * 0.45
+	sprite.scale = Vector2.ONE * 0.62
 	add_child(sprite)
 	var tw := create_tween()
-	tw.tween_property(sprite, "scale", Vector2.ONE * 0.55, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(sprite, "scale", Vector2.ONE * 0.75, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# 随机攻击相位，避免多个士兵同步挥击/同步闪白
 	attack_cd = randf_range(0.0, 0.9)
 
