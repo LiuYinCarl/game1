@@ -33,6 +33,11 @@ var projs: Array = []
 var slow_pct := 0.0  # 冰霜塔：命中减速幅度/时长
 var slow_time := 0.0
 var pierce := 0  # 箭塔 3 级技能：穿透额外目标数
+var freeze_chance := 0.0  # 冰霜塔 3 级：冻结概率/时长
+var freeze_time := 0.0
+var burst := 1  # 炮塔 3 级：弹幕连发数量
+var chain := 0  # 法师塔 3 级：连锁闪电目标数
+var chain_damage := 0.6
 var turret: Sprite2D
 var last_target: Node2D = null
 
@@ -96,6 +101,11 @@ func _refresh() -> void:
 	current_range = lv.get("range", 0.0)
 	splash = lv.get("splash", 0.0)
 	pierce = lv.get("pierce", 0)
+	freeze_chance = lv.get("freeze_chance", 0.0)
+	freeze_time = lv.get("freeze_time", 0.0)
+	burst = lv.get("burst", 1)
+	chain = lv.get("chain", 0)
+	chain_damage = lv.get("chain_damage", 0.6)
 	# 等级外观：底座换帧 + 换武器贴图
 	base.frame = level - 1
 	if weapons[level - 1] != null:

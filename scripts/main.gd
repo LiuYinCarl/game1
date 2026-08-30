@@ -1018,8 +1018,28 @@ func _on_tower_fired(tower, target) -> void:
 	p.setup(tower.global_position, target, tower.proj_speed, tower.current_damage, tower.splash, tower.proj_tex, tower.proj_size, tower.hit_tex, tower.hit_size, tower.damage_type)
 	p.slow_pct = tower.slow_pct
 	p.slow_time = tower.slow_time
+	p.freeze_chance = tower.freeze_chance
+	p.freeze_time = tower.freeze_time
 	p.pierce = tower.pierce
+	p.chain = tower.chain
+	p.chain_damage = tower.chain_damage
 	add_child(p)
+	# 弹幕：剩余弹丸依次补射（目标死亡则射向目标最后已知位置）
+	var aim0: Vector2 = target.global_position
+	for i in range(tower.burst - 1):
+		var delay := 0.14 * (i + 1)
+		get_tree().create_timer(delay).timeout.connect(func() -> void:
+			if not is_instance_valid(tower) or game_ended:
+				return
+			var tgt: Node2D = target if is_instance_valid(target) and not target.dead else null
+			var pp = Projectile.new()
+			pp.setup(tower.global_position + Vector2(randf_range(-8, 8), randf_range(-8, 8)),
+				tgt, tower.proj_speed, tower.current_damage, tower.splash, tower.proj_tex,
+				tower.proj_size, tower.hit_tex, tower.hit_size, tower.damage_type)
+			if tgt == null:
+				pp.position = aim0
+			add_child(pp)
+			play_sfx("shoot_cannon", 0.9, 1.0))
 
 
 # ---------- 特效 ----------
@@ -1178,6 +1198,27 @@ class ShockRing extends Node2D:
 	func _draw() -> void:
 		var r := lerpf(12.0, 95.0, t)
 		draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(1.0, 0.85, 0.5, (1.0 - t) * 0.7), 3.0 * (1.0 - t) + 1.0)
+
+
+## 连锁闪电：带抖动的折线电弧，短暂停留后消散
+func spawn_lightning(from: Vector2, to: Vector2) -> void:
+	var line := Line2D.new()
+	line.width = 3.0
+	line.default_color = Color(0.65, 0.85, 1.0, 0.95)
+	var cm := CanvasItemMaterial.new()
+	cm.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	line.material = cm
+	var seg := maxi(3, int(from.distance_to(to) / 40.0))
+	line.add_point(from)
+	for i in range(1, seg):
+		var t := float(i) / seg
+		var p := from.lerp(to, t) + Vector2(randf_range(-14, 14), randf_range(-14, 14))
+		line.add_point(p)
+	line.add_point(to)
+	add_child(line)
+	var tw := line.create_tween()
+	tw.tween_property(line, "modulate:a", 0.0, 0.18)
+	tw.tween_callback(line.queue_free)
 
 
 func spawn_float_text(pos: Vector2, text: String, color: Color) -> void:

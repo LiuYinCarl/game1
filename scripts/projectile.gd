@@ -8,6 +8,10 @@ var damage_type := "physical"
 var splash := 0.0
 var slow_pct := 0.0  # 命中减速（冰霜塔）
 var slow_time := 0.0
+var freeze_chance := 0.0  # 3 级冰霜塔：概率冻结定身
+var freeze_time := 0.0
+var chain := 0  # 3 级法师塔：连锁闪电目标数
+var chain_damage := 0.6
 var pierce := 0  # 穿透：命中后继续飞向附近的下一个目标（箭塔 3 级）
 var hit_list: Array = []
 var hit_tex: Texture2D = null
@@ -94,6 +98,35 @@ func _process(delta: float) -> void:
 		global_position += d.normalized() * step
 
 
+## 连锁闪电：从命中点跳向附近的敌人，伤害逐跳衰减
+func _chain_lightning(pos: Vector2) -> void:
+	var game := get_tree().get_first_node_in_group("game")
+	if game == null:
+		return
+	var cur := pos
+	var dmg := damage * chain_damage
+	var hit_set := []
+	if is_instance_valid(target):
+		hit_set.append(target)
+	for i in range(chain):
+		var nxt: Node2D = null
+		var nd := INF
+		for e in get_tree().get_nodes_in_group("enemies"):
+			if not is_instance_valid(e) or e.dead or e in hit_set:
+				continue
+			var dd: float = e.global_position.distance_to(cur)
+			if dd <= 140.0 and dd < nd:
+				nd = dd
+				nxt = e
+		if nxt == null:
+			break
+		game.spawn_lightning(cur, nxt.global_position)
+		nxt.take_damage(dmg, "magic")
+		hit_set.append(nxt)
+		cur = nxt.global_position
+		dmg *= chain_damage
+
+
 func _hit(pos: Vector2) -> void:
 	var game := get_tree().get_first_node_in_group("game")
 	if game == null:
@@ -116,3 +149,7 @@ func _hit(pos: Vector2) -> void:
 			target.take_damage(damage, damage_type)
 			if slow_pct > 0.0:
 				target.apply_slow(slow_pct, slow_time)
+			if freeze_chance > 0.0 and randf() < freeze_chance:
+				target.apply_slow(1.0, freeze_time)  # 冻结定身
+			if chain > 0 and damage_type == "magic":
+				_chain_lightning(pos)

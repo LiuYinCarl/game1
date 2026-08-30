@@ -98,7 +98,7 @@ const TOWER_TYPES := {
 		"levels": [
 			{"damage": 26.0, "rate": 1.15, "range": 190.0},
 			{"damage": 42.0, "rate": 1.05, "range": 202.0, "cost": 85},
-			{"damage": 68.0, "rate": 0.95, "range": 214.0, "cost": 140},
+			{"damage": 68.0, "rate": 0.95, "range": 214.0, "cost": 140, "chain": 2, "chain_damage": 0.6},
 		],
 		"base": preload("res://assets/spire/tower_mage_base.png"),
 		"weapons": [preload("res://assets/spire/tower_mage_w1.png"), preload("res://assets/spire/tower_mage_w2.png"), preload("res://assets/spire/tower_mage_w3.png")],
@@ -109,7 +109,7 @@ const TOWER_TYPES := {
 		"levels": [
 			{"damage": 20.0, "rate": 1.6, "range": 190.0, "splash": 70.0},
 			{"damage": 34.0, "rate": 1.45, "range": 202.0, "splash": 80.0, "cost": 105},
-			{"damage": 56.0, "rate": 1.30, "range": 214.0, "splash": 90.0, "cost": 170},
+			{"damage": 56.0, "rate": 1.30, "range": 214.0, "splash": 90.0, "cost": 170, "burst": 3},
 		],
 		"base": preload("res://assets/spire/tower_cannon_base.png"),
 		"weapons": [preload("res://assets/spire/tower_cannon_w1.png"), preload("res://assets/spire/tower_cannon_w2.png"), preload("res://assets/spire/tower_cannon_w3.png")],
@@ -121,7 +121,7 @@ const TOWER_TYPES := {
 		"levels": [
 			{"damage": 5.0, "rate": 1.0, "range": 200.0, "slow_pct": 0.4},
 			{"damage": 9.0, "rate": 0.95, "range": 212.0, "slow_pct": 0.5, "cost": 80},
-			{"damage": 14.0, "rate": 0.9, "range": 224.0, "slow_pct": 0.6, "cost": 130},
+			{"damage": 14.0, "rate": 0.9, "range": 224.0, "slow_pct": 0.6, "cost": 130, "freeze_chance": 0.25, "freeze_time": 0.9},
 		],
 		"base": preload("res://assets/spire/tower_frost_base.png"),
 		"weapons": [preload("res://assets/spire/tower_frost_w1.png"), preload("res://assets/spire/tower_frost_w2.png"), preload("res://assets/spire/tower_frost_w3.png")],
