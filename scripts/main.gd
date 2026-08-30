@@ -62,6 +62,7 @@ var camera: Camera2D
 var shake_amp := 0.0
 var hovered_spot := -1
 var ui_root: Control
+var chart_layer: CanvasLayer = null  # 难度曲线覆盖层
 var gold_label: Label
 var lives_label: Label
 var wave_label: Label
@@ -350,13 +351,7 @@ void fragment() {
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--chart="):
 			_load_level(clampi(int(arg.get_slice("=", 1)) - 1, 0, LevelData.LEVELS.size() - 1))
-			var chart_layer := CanvasLayer.new()
-			chart_layer.layer = 20
-			add_child(chart_layer)
-			var chart := ChartDrawer.new()
-			chart.series = _build_chart_data()
-			chart.title = "L%d %s 难度曲线" % [level_index + 1, level_name]
-			chart_layer.add_child(chart)
+			open_chart_overlay()
 			_do_chart_capture()
 			return
 	# 自动化测试：--test 运行测试套件并以退出码报告结果
@@ -1336,6 +1331,43 @@ func _tower_upgrade_preview(t) -> String:
 	return " · ".join(parts)
 
 
+## 打开当前关卡的难度曲线覆盖层（测试面板与 --chart 共用）
+func open_chart_overlay() -> void:
+	if chart_layer != null:
+		chart_layer.queue_free()
+		chart_layer = null
+		return
+	chart_layer = CanvasLayer.new()
+	chart_layer.layer = 20
+	add_child(chart_layer)
+	var chart := ChartDrawer.new()
+	chart.series = _build_chart_data()
+	chart.title = "L%d %s 难度曲线" % [level_index + 1, level_name]
+	chart_layer.add_child(chart)
+	# 关闭按钮
+	var close_btn := Button.new()
+	close_btn.text = "关闭"
+	close_btn.position = Vector2(1760, 30)
+	close_btn.size = Vector2(110, 46)
+	close_btn.add_theme_font_size_override("font_size", 22)
+	var btn_style := StyleBoxFlat.new()
+	btn_style.bg_color = Color(0.25, 0.18, 0.08, 0.95)
+	btn_style.set_corner_radius_all(10)
+	btn_style.border_color = Color(0.85, 0.65, 0.25)
+	btn_style.set_border_width_all(2)
+	close_btn.add_theme_stylebox_override("normal", btn_style)
+	close_btn.add_theme_stylebox_override("hover", btn_style)
+	close_btn.add_theme_color_override("font_color", Color(0.95, 0.85, 0.5))
+	close_btn.pressed.connect(close_chart_overlay)
+	chart_layer.add_child(close_btn)
+
+
+func close_chart_overlay() -> void:
+	if chart_layer != null:
+		chart_layer.queue_free()
+		chart_layer = null
+
+
 ## 逐波统计：敌方总血量 / 敌方赏金 / 玩家累计金币可支撑的输出模型
 func _build_chart_data() -> Array:
 	var data := []
@@ -1663,6 +1695,7 @@ func _toggle_debug_panel() -> void:
 		["金币 +1000", _debug_add_gold.bind(1000)],
 		["生命 +5", _debug_add_lives.bind(5)],
 		["清空场上敌人", _debug_clear_enemies],
+		["难度曲线图（本关）", open_chart_overlay],
 	]:
 		var btn := Button.new()
 		btn.text = entry[0]
