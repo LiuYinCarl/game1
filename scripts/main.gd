@@ -26,87 +26,6 @@ const FX_LIGHTNING = preload("res://assets/fx/spark_05.png")
 
 var SCREEN := Vector2(1920, 1080)
 
-# 六关数据目录。hand=true 使用手工波次 WAVES_L1，否则用 gen=[波数, 预算] 参数化生成
-var LEVELS := [
-	# paths: 1-3 条路径（可共享尾段汇聚到王城）；gen: [波数, 预算]；seed: 建造点生成种子
-	{"name": "翠绿小径", "gold": 230, "lives": 20, "hp_growth": 0.06, "gen": [8, 55.0], "seed": 1, "paths": [[
-		Vector2(-60, 220), Vector2(480, 220), Vector2(480, 760), Vector2(1000, 760),
-		Vector2(1000, 320), Vector2(1520, 320), Vector2(1520, 800), Vector2(1980, 800)]]},
-	{"name": "蜿蜒河谷", "gold": 240, "lives": 20, "hp_growth": 0.065, "gen": [8, 59.0], "seed": 2, "paths": [[
-		Vector2(-60, 560), Vector2(340, 560), Vector2(620, 300), Vector2(1020, 300),
-		Vector2(1280, 580), Vector2(1620, 580), Vector2(1800, 780), Vector2(1980, 780)]]},
-	{"name": "林地阶梯", "gold": 250, "lives": 20, "hp_growth": 0.07, "gen": [9, 63.0], "seed": 3, "paths": [[
-		Vector2(-60, 160), Vector2(340, 160), Vector2(560, 380), Vector2(880, 380),
-		Vector2(1100, 620), Vector2(1420, 620), Vector2(1620, 840), Vector2(1980, 840)]]},
-	{"name": "双子河口", "gold": 260, "lives": 20, "hp_growth": 0.075, "gen": [9, 67.0], "seed": 4, "paths": [
-		[Vector2(-60, 260), Vector2(680, 260), Vector2(680, 580), Vector2(1280, 580), Vector2(1280, 760), Vector2(1980, 760)],
-		[Vector2(-60, 900), Vector2(680, 900), Vector2(680, 580), Vector2(1280, 580), Vector2(1280, 760), Vector2(1980, 760)]]},
-	{"name": "回环林地", "gold": 270, "lives": 20, "hp_growth": 0.08, "gen": [9, 71.0], "seed": 5, "paths": [[
-		Vector2(-60, 180), Vector2(1560, 180), Vector2(1560, 900), Vector2(420, 900),
-		Vector2(420, 440), Vector2(1180, 440), Vector2(1180, 680), Vector2(1980, 680)]]},
-	{"name": "峡谷要道", "gold": 280, "lives": 20, "hp_growth": 0.085, "gen": [10, 75.0], "seed": 6, "paths": [[
-		Vector2(-60, 900), Vector2(300, 900), Vector2(300, 540), Vector2(700, 540), Vector2(700, 240),
-		Vector2(1150, 240), Vector2(1150, 600), Vector2(1560, 600), Vector2(1560, 300), Vector2(1980, 300)]]},
-	{"name": "双子河谷", "gold": 290, "lives": 20, "hp_growth": 0.09, "gen": [10, 79.0], "seed": 7, "paths": [
-		[Vector2(-60, 320), Vector2(620, 320), Vector2(620, 640), Vector2(1300, 640), Vector2(1300, 300),
-			Vector2(1700, 300), Vector2(1700, 560), Vector2(1980, 560)],
-		[Vector2(-60, 880), Vector2(620, 880), Vector2(620, 640), Vector2(1300, 640), Vector2(1300, 300),
-			Vector2(1700, 300), Vector2(1700, 560), Vector2(1980, 560)]]},
-	{"name": "山道盘旋", "gold": 300, "lives": 20, "hp_growth": 0.095, "gen": [10, 83.0], "seed": 8, "paths": [[
-		Vector2(-60, 140), Vector2(1700, 140), Vector2(1700, 420), Vector2(340, 420),
-		Vector2(340, 700), Vector2(1400, 700), Vector2(1400, 930), Vector2(1980, 930)]]},
-	{"name": "三岔峡谷", "gold": 310, "lives": 20, "hp_growth": 0.10, "gen": [11, 87.0], "seed": 9, "paths": [
-		[Vector2(-60, 180), Vector2(560, 180), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
-			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)],
-		[Vector2(-60, 540), Vector2(560, 540), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
-			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)],
-		[Vector2(-60, 900), Vector2(560, 900), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
-			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)]]},
-	{"name": "帝国大道", "gold": 320, "lives": 20, "hp_growth": 0.105, "gen": [11, 91.0], "seed": 10, "paths": [[
-		Vector2(-60, 540), Vector2(500, 540), Vector2(760, 380), Vector2(1180, 380),
-		Vector2(1420, 600), Vector2(1980, 600)]]},
-	{"name": "沼泽双径", "gold": 330, "lives": 20, "hp_growth": 0.11, "gen": [11, 95.0], "seed": 11, "paths": [
-		[Vector2(-60, 240), Vector2(520, 240), Vector2(520, 520), Vector2(1080, 520), Vector2(1080, 300),
-			Vector2(1620, 300), Vector2(1620, 560), Vector2(1980, 560)],
-		[Vector2(-60, 860), Vector2(900, 860), Vector2(900, 660), Vector2(1080, 660), Vector2(1080, 520),
-			Vector2(1620, 300), Vector2(1620, 560), Vector2(1980, 560)]]},
-	{"name": "回旋走廊", "gold": 340, "lives": 20, "hp_growth": 0.115, "gen": [12, 99.0], "seed": 12, "paths": [[
-		Vector2(-60, 700), Vector2(420, 700), Vector2(420, 340), Vector2(900, 340), Vector2(900, 760),
-		Vector2(1380, 760), Vector2(1380, 420), Vector2(1980, 420)]]},
-	{"name": "三路会师", "gold": 350, "lives": 20, "hp_growth": 0.12, "gen": [12, 103.0], "seed": 13, "paths": [
-		[Vector2(-60, 200), Vector2(480, 200), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)],
-		[Vector2(-60, 540), Vector2(480, 540), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)],
-		[Vector2(-60, 880), Vector2(480, 880), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)]]},
-	{"name": "断桥峡谷", "gold": 360, "lives": 20, "hp_growth": 0.125, "gen": [12, 107.0], "seed": 14, "paths": [
-		[Vector2(-60, 300), Vector2(700, 300), Vector2(960, 560), Vector2(1500, 560), Vector2(1500, 800), Vector2(1980, 800)],
-		[Vector2(-60, 820), Vector2(700, 820), Vector2(960, 560), Vector2(1500, 560), Vector2(1500, 800), Vector2(1980, 800)]]},
-	{"name": "迷雾盘径", "gold": 370, "lives": 20, "hp_growth": 0.13, "gen": [13, 111.0], "seed": 15, "paths": [[
-		Vector2(-60, 160), Vector2(300, 160), Vector2(300, 460), Vector2(760, 460), Vector2(760, 160),
-		Vector2(1240, 160), Vector2(1240, 460), Vector2(1660, 460), Vector2(1660, 780), Vector2(1980, 780)]]},
-	{"name": "三面楚歌", "gold": 380, "lives": 20, "hp_growth": 0.135, "gen": [13, 115.0], "seed": 16, "paths": [
-		[Vector2(-60, 540), Vector2(400, 540), Vector2(400, 300), Vector2(900, 300), Vector2(900, 560),
-			Vector2(1400, 560), Vector2(1400, 780), Vector2(1980, 780)],
-		[Vector2(900, -60), Vector2(900, 300), Vector2(900, 560), Vector2(1400, 560), Vector2(1400, 780), Vector2(1980, 780)],
-		[Vector2(1400, 1140), Vector2(1400, 780), Vector2(1980, 780)]]},
-	{"name": "双龙出海", "gold": 390, "lives": 20, "hp_growth": 0.14, "gen": [13, 119.0], "seed": 17, "paths": [
-		[Vector2(-60, 180), Vector2(1500, 180), Vector2(1500, 540), Vector2(1980, 540)],
-		[Vector2(-60, 900), Vector2(1500, 900), Vector2(1500, 540), Vector2(1980, 540)]]},
-	{"name": "折返迷宫", "gold": 400, "lives": 20, "hp_growth": 0.145, "gen": [13, 123.0], "seed": 18, "paths": [[
-		Vector2(-60, 220), Vector2(460, 220), Vector2(460, 560), Vector2(900, 560), Vector2(900, 220),
-		Vector2(1340, 220), Vector2(1340, 560), Vector2(1980, 560)]]},
-	{"name": "王城三径", "gold": 410, "lives": 20, "hp_growth": 0.15, "gen": [14, 127.0], "seed": 19, "paths": [
-		[Vector2(-60, 300), Vector2(540, 300), Vector2(540, 540), Vector2(1100, 540), Vector2(1100, 300),
-			Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)],
-		[Vector2(-60, 760), Vector2(540, 760), Vector2(540, 540), Vector2(1100, 540), Vector2(1100, 300),
-			Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)],
-		[Vector2(540, -60), Vector2(540, 300), Vector2(1100, 540), Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)]]},
-	{"name": "决战王城", "gold": 430, "lives": 20, "hp_growth": 0.16, "gen": [14, 131.0], "seed": 20, "paths": [
-		[Vector2(-60, 540), Vector2(360, 540), Vector2(360, 260), Vector2(820, 260), Vector2(820, 560),
-			Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)],
-		[Vector2(-60, 120), Vector2(820, 120), Vector2(820, 260), Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)],
-		[Vector2(-60, 960), Vector2(1280, 960), Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)]]},
-]
-
 # 当前关卡状态（由 _load_level 填充）
 var level_index := 0
 var level_name := ""
@@ -119,138 +38,7 @@ var hp_growth := 0.07
 var start_gold := 230
 var start_lives := 20
 
-const ENEMY_NAMES := {
-	"grunt": "叶甲虫", "sapper": "花粉虫", "orc": "毒蝎", "shaman": "妖火虫",
-	"knight": "熔甲蟹", "raider": "赤蝎", "ogre": "巨铠蟹", "troll": "暴君巨蟹",
-	"saucer": "虚空蝶", "recon": "铁头飞蝗", "bomber": "钳击飞甲", "phantom": "幽蝶",
-}
 
-## 抗性 armor：受到该类型伤害的倍率（<1 抗性 / >1 虚弱）；flying 飞行单位无法被士兵拦截
-## anim_frames：行走序列帧数（assets/spire 下的横条序列图，朝右）
-var ENEMY_TYPES := {
-	"grunt": {"hp": 35.0, "speed": 55.0, "reward": 12, "damage": 1, "radius": 15.0,
-		"texture": preload("res://assets/spire/enemy_leafbug.png"), "anim_frames": 6, "sprite_scale": 1.2},
-	"sapper": {"hp": 26.0, "speed": 88.0, "reward": 10, "damage": 1, "radius": 11.0,
-		"texture": preload("res://assets/spire/enemy_leafbug.png"), "anim_frames": 6, "sprite_scale": 0.9,
-		"tint": Color(1.55, 1.35, 0.55)},
-	"orc": {"hp": 105.0, "speed": 44.0, "reward": 20, "damage": 1, "radius": 18.0,
-		"armor": {"physical": 1.25}, "soldier_dmg": 12.0,
-		"texture": preload("res://assets/spire/enemy_scorpion.png"), "anim_frames": 8, "sprite_scale": 1.3},
-	"shaman": {"hp": 90.0, "speed": 48.0, "reward": 24, "damage": 1, "radius": 14.0,
-		"armor": {"magic": 0.4, "physical": 1.25}, "soldier_dmg": 14.0,
-		"texture": preload("res://assets/spire/enemy_firebug.png"), "anim_frames": 6, "sprite_scale": 1.05,
-		"tint": Color(1.2, 0.75, 1.55)},
-	"knight": {"hp": 170.0, "speed": 36.0, "reward": 30, "damage": 2, "radius": 20.0,
-		"armor": {"physical": 0.45, "magic": 1.6}, "soldier_dmg": 18.0,
-		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 1.4},
-	"raider": {"hp": 130.0, "speed": 72.0, "reward": 28, "damage": 2, "radius": 16.0,
-		"armor": {"physical": 0.6, "magic": 1.1}, "soldier_dmg": 16.0,
-		"texture": preload("res://assets/spire/enemy_scorpion.png"), "anim_frames": 8, "sprite_scale": 1.2,
-		"tint": Color(1.45, 0.95, 0.6)},
-	"ogre": {"hp": 550.0, "speed": 26.0, "reward": 65, "damage": 3, "radius": 26.0,
-		"armor": {"physical": 0.85, "magic": 0.85}, "soldier_dmg": 30.0,
-		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 1.9,
-		"tint": Color(1.05, 0.9, 1.05)},
-	"troll": {"hp": 950.0, "speed": 30.0, "reward": 90, "damage": 5, "radius": 30.0,
-		"armor": {"magic": 0.5}, "soldier_dmg": 45.0,
-		"texture": preload("res://assets/spire/enemy_magma.png"), "anim_frames": 8, "sprite_scale": 2.5,
-		"tint": Color(0.95, 0.6, 0.6)},
-	"saucer": {"hp": 60.0, "speed": 75.0, "reward": 14, "damage": 1, "radius": 13.0,
-		"flying": true, "armor": {"magic": 1.3, "physical": 0.9},
-		"texture": preload("res://assets/spire/enemy_voidfly.png"), "anim_frames": 6, "sprite_scale": 1.05},
-	"recon": {"hp": 45.0, "speed": 125.0, "reward": 14, "damage": 1, "radius": 13.0,
-		"flying": true, "armor": {"physical": 1.4, "magic": 0.9},
-		"texture": preload("res://assets/spire/enemy_locust.png"), "anim_frames": 5, "sprite_scale": 1.0},
-	"bomber": {"hp": 150.0, "speed": 60.0, "reward": 30, "damage": 3, "radius": 16.0,
-		"flying": true, "armor": {"physical": 0.7, "magic": 1.2},
-		"texture": preload("res://assets/spire/enemy_clampfly.png"), "anim_frames": 8, "sprite_scale": 1.35},
-	"phantom": {"hp": 85.0, "speed": 70.0, "reward": 26, "damage": 2, "radius": 14.0,
-		"flying": true, "armor": {"physical": 0.2, "magic": 1.8},
-		"texture": preload("res://assets/spire/enemy_voidfly.png"), "anim_frames": 6, "sprite_scale": 1.1,
-		"tint": Color(0.75, 0.85, 1.6, 0.62)},
-}
-
-const TOWER_ROLE := {
-	"archer": "单体速射 · 物理伤害", "mage": "高伤爆发 · 魔法伤害",
-	"cannon": "范围溅射 · 物理伤害", "frost": "减速控场 · 魔法伤害",
-	"barracks": "派出士兵拦截敌人",
-}
-
-# 塔的数值按等级显式成表：damage 伤害 / rate 开火间隔（秒）/ range 射程 / splash 溅射半径，
-# cost 为升到该级的花费（levels[0] 是 1 级建造数据，cost 字段仅在 2、3 级有效）；
-# 兵营为 soldiers 士兵数 / soldier_hp 士兵生命 / soldier_dmg 士兵攻击 / respawn 补兵秒数。
-# base 为三级外观序列图（64px 一帧），weapons 为各级武器攻击动画横条，
-# projs 为各级弹丸（竖直朝上绘制，飞行时按方向旋转）
-var TOWER_TYPES := {
-	"archer": {"name": "箭塔", "cost": 70, "damage_type": "physical", "proj_speed": 480.0, "color": Color("c07f2a"),
-		"levels": [
-			{"damage": 9.0, "rate": 0.45, "range": 200.0},
-			{"damage": 14.0, "rate": 0.40, "range": 212.0, "cost": 60},
-			{"damage": 22.0, "rate": 0.35, "range": 224.0, "cost": 95, "pierce": 1},
-		],
-		"base": preload("res://assets/spire/tower_archer_base.png"),
-		"weapons": [preload("res://assets/spire/tower_archer_w1.png"), preload("res://assets/spire/tower_archer_w2.png"), preload("res://assets/spire/tower_archer_w3.png")],
-		"weapon_frames": 6, "weapon_scale": 0.85,
-		"projs": [preload("res://assets/spire/tower_archer_p1.png"), preload("res://assets/spire/tower_archer_p2.png"), preload("res://assets/spire/tower_archer_p3.png")],
-		"proj_size": 26.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
-	"mage": {"name": "法师塔", "cost": 100, "damage_type": "magic", "proj_speed": 340.0, "color": Color("7a5fd0"),
-		"levels": [
-			{"damage": 26.0, "rate": 1.15, "range": 190.0},
-			{"damage": 42.0, "rate": 1.05, "range": 202.0, "cost": 85},
-			{"damage": 68.0, "rate": 0.95, "range": 214.0, "cost": 140},
-		],
-		"base": preload("res://assets/spire/tower_mage_base.png"),
-		"weapons": [preload("res://assets/spire/tower_mage_w1.png"), preload("res://assets/spire/tower_mage_w2.png"), preload("res://assets/spire/tower_mage_w3.png")],
-		"weapon_frames": 8, "weapon_scale": 0.85,
-		"projs": [preload("res://assets/spire/tower_mage_p1.png"), preload("res://assets/spire/tower_mage_p2.png"), preload("res://assets/spire/tower_mage_p3.png")],
-		"proj_size": 16.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
-	"cannon": {"name": "炮塔", "cost": 125, "damage_type": "physical", "proj_speed": 300.0, "color": Color("555555"),
-		"levels": [
-			{"damage": 20.0, "rate": 1.6, "range": 190.0, "splash": 70.0},
-			{"damage": 34.0, "rate": 1.45, "range": 202.0, "splash": 80.0, "cost": 105},
-			{"damage": 56.0, "rate": 1.30, "range": 214.0, "splash": 90.0, "cost": 170},
-		],
-		"base": preload("res://assets/spire/tower_cannon_base.png"),
-		"weapons": [preload("res://assets/spire/tower_cannon_w1.png"), preload("res://assets/spire/tower_cannon_w2.png"), preload("res://assets/spire/tower_cannon_w3.png")],
-		"weapon_frames": 6, "weapon_scale": 0.95,
-		"projs": [preload("res://assets/spire/tower_cannon_p1.png"), preload("res://assets/spire/tower_cannon_p2.png"), preload("res://assets/spire/tower_cannon_p3.png")],
-		"proj_size": 26.0},
-	"frost": {"name": "冰霜塔", "cost": 90, "damage_type": "magic", "proj_speed": 380.0, "color": Color("5ab8d8"),
-		"slow_time": 2.0,
-		"levels": [
-			{"damage": 5.0, "rate": 1.0, "range": 200.0, "slow_pct": 0.4},
-			{"damage": 9.0, "rate": 0.95, "range": 212.0, "slow_pct": 0.5, "cost": 80},
-			{"damage": 14.0, "rate": 0.9, "range": 224.0, "slow_pct": 0.6, "cost": 130},
-		],
-		"base": preload("res://assets/spire/tower_frost_base.png"),
-		"weapons": [preload("res://assets/spire/tower_frost_w1.png"), preload("res://assets/spire/tower_frost_w2.png"), preload("res://assets/spire/tower_frost_w3.png")],
-		"weapon_frames": [6, 7, 9], "weapon_scale": 0.9,
-		"projs": [preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png")],
-		"proj_size": 22.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/spark_05.png"},
-	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
-		"levels": [
-			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
-			{"soldiers": 3, "soldier_hp": 95.0, "soldier_dmg": 12.0, "respawn": 5.0, "range": 190.0, "cost": 90},
-			{"soldiers": 3, "soldier_hp": 150.0, "soldier_dmg": 19.0, "respawn": 4.0, "range": 190.0, "cost": 150},
-		],
-		"base": preload("res://assets/spire/tower_barracks_base.png"),
-		"weapons": [null, null, null], "weapon_frames": 0, "weapon_scale": 1.0},
-}
-
-const WAVES_L1 := [
-	[{"type": "grunt", "count": 6, "interval": 1.1}],
-	[{"type": "grunt", "count": 8, "interval": 0.9}, {"type": "sapper", "count": 5, "interval": 0.6, "delay": 3.0}],
-	[{"type": "grunt", "count": 6, "interval": 0.8}, {"type": "saucer", "count": 4, "interval": 1.0, "delay": 2.0}],
-	[{"type": "orc", "count": 5, "interval": 1.1}, {"type": "sapper", "count": 6, "interval": 0.5, "delay": 3.0},
-		{"type": "shaman", "count": 2, "interval": 1.4, "delay": 5.0}],
-	[{"type": "recon", "count": 6, "interval": 0.7}, {"type": "orc", "count": 4, "interval": 1.0, "delay": 3.0}],
-	[{"type": "knight", "count": 3, "interval": 1.6}, {"type": "grunt", "count": 8, "interval": 0.6, "delay": 2.0},
-		{"type": "shaman", "count": 3, "interval": 1.2, "delay": 4.0}],
-	[{"type": "raider", "count": 3, "interval": 1.4}, {"type": "phantom", "count": 4, "interval": 1.0, "delay": 3.0},
-		{"type": "saucer", "count": 5, "interval": 0.7, "delay": 5.0}],
-	[{"type": "bomber", "count": 2, "interval": 2.0}, {"type": "ogre", "count": 1, "interval": 1.0},
-		{"type": "troll", "count": 1, "interval": 1.0, "delay": 5.0}, {"type": "orc", "count": 4, "interval": 0.9, "delay": 7.0}],
-]
 
 var gold: int
 var lives: int
@@ -560,7 +348,7 @@ void fragment() {
 	# 战力曲线图：--chart=N 输出第 N 关的敌我强度曲线到 /tmp/tafang_chart_LN.png
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--chart="):
-			_load_level(clampi(int(arg.get_slice("=", 1)) - 1, 0, LEVELS.size() - 1))
+			_load_level(clampi(int(arg.get_slice("=", 1)) - 1, 0, LevelData.LEVELS.size() - 1))
 			var chart_layer := CanvasLayer.new()
 			chart_layer.layer = 20
 			add_child(chart_layer)
@@ -594,7 +382,7 @@ void fragment() {
 		var blocker: Node2D = null
 		if not OS.get_cmdline_user_args().has("--no-blocker"):
 			blocker = Enemy.new()
-			blocker.setup("knight", path_points, ENEMY_TYPES["knight"], 1.0)
+			blocker.setup("knight", path_points, LevelData.ENEMY_TYPES["knight"], 1.0)
 			var target_p: Vector2 = bt.rally_point + Vector2(30, 0)
 			var best_d := INF
 			for i in path_points.size() - 1:
@@ -616,7 +404,7 @@ void fragment() {
 		var first_enemy = get_tree().get_nodes_in_group("enemies")[0]
 		for i in 3:
 			var key: String = ["archer", "mage", "cannon"][i]
-			var d: Dictionary = TOWER_TYPES[key]
+			var d: Dictionary = LevelData.TOWER_TYPES[key]
 			var tp = Projectile.new()
 			tp.setup(Vector2(80, 300 + i * 40), first_enemy, 35.0, 0.0, 0.0, d["projs"][0], d["proj_size"])
 			add_child(tp)
@@ -650,8 +438,8 @@ void fragment() {
 
 
 func _load_level(idx: int) -> void:
-	level_index = clampi(idx, 0, LEVELS.size() - 1)
-	var L: Dictionary = LEVELS[level_index]
+	level_index = clampi(idx, 0, LevelData.LEVELS.size() - 1)
+	var L: Dictionary = LevelData.LEVELS[level_index]
 	level_name = L["name"]
 	paths = []
 	for p in L["paths"]:
@@ -910,7 +698,7 @@ func _smoke_build() -> void:
 				t.apply_upgrade()
 			continue
 		var key: String = order[n % 3]
-		if gold >= TOWER_TYPES[key]["cost"]:
+		if gold >= LevelData.TOWER_TYPES[key]["cost"]:
 			_build_tower(i, key)
 			n += 1
 
@@ -935,7 +723,7 @@ func _end_wave() -> void:
 func spawn_enemy(type_name: String, path_idx := 0) -> void:
 	var e = Enemy.new()
 	var pts: PackedVector2Array = paths[path_idx] if path_idx < paths.size() else path_points
-	e.setup(type_name, pts, ENEMY_TYPES[type_name], spawn_hp_scale)
+	e.setup(type_name, pts, LevelData.ENEMY_TYPES[type_name], spawn_hp_scale)
 	e.died.connect(_on_enemy_died)
 	e.reached_end.connect(_on_enemy_reached_end)
 	add_child(e)
@@ -988,7 +776,7 @@ func _open_menu(idx: int) -> void:
 	if towers.has(idx):
 		var t: Node2D = towers[idx]
 		var title := Label.new()
-		title.text = "%s  Lv.%d" % [TOWER_TYPES[t.type]["name"], t.level]
+		title.text = "%s  Lv.%d" % [LevelData.TOWER_TYPES[t.type]["name"], t.level]
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		title.add_theme_font_size_override("font_size", 18)
 		title.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
@@ -1036,10 +824,10 @@ func _open_menu(idx: int) -> void:
 		sell_btn.pressed.connect(_sell_tower.bind(idx))
 		vbox.add_child(sell_btn)
 	else:
-		for key in TOWER_TYPES:
-			var d: Dictionary = TOWER_TYPES[key]
+		for key in LevelData.TOWER_TYPES:
+			var d: Dictionary = LevelData.TOWER_TYPES[key]
 			var btn := Button.new()
-			btn.text = "%s  %d 金\n%s" % [d["name"], d["cost"], TOWER_ROLE[key]]
+			btn.text = "%s  %d 金\n%s" % [d["name"], d["cost"], LevelData.TOWER_ROLE[key]]
 			btn.custom_minimum_size = Vector2(170, 48)
 			btn.disabled = gold < d["cost"]
 			_style_button(btn)
@@ -1073,9 +861,9 @@ func _open_enemy_menu(e: Node2D) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 4)
 	menu_panel.add_child(vbox)
-	var data: Dictionary = ENEMY_TYPES[e.type]
+	var data: Dictionary = LevelData.ENEMY_TYPES[e.type]
 	var title := Label.new()
-	title.text = ENEMY_NAMES.get(e.type, e.type)
+	title.text = LevelData.ENEMY_NAMES.get(e.type, e.type)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 18)
 	title.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
@@ -1106,7 +894,7 @@ func _open_enemy_menu(e: Node2D) -> void:
 
 
 func _enemy_info_lines(e: Node2D) -> Array:
-	var data: Dictionary = ENEMY_TYPES[e.type]
+	var data: Dictionary = LevelData.ENEMY_TYPES[e.type]
 	var lines: Array = []
 	var speed_txt: String = "飞行 %.0f" % e.speed if e.flying else "速度 %.0f" % e.speed
 	lines.append([speed_txt + " · 赏金 %d" % e.reward, Color(0.82, 0.85, 0.78)])
@@ -1166,7 +954,7 @@ func _close_menu_keep_rally() -> void:
 
 
 func _build_tower(idx: int, key: String) -> void:
-	var d: Dictionary = TOWER_TYPES[key]
+	var d: Dictionary = LevelData.TOWER_TYPES[key]
 	if gold < d["cost"]:
 		return
 	gold -= d["cost"]
@@ -1377,65 +1165,6 @@ func spawn_explosion(pos: Vector2) -> void:
 
 
 ## 难度曲线图：三条曲线各自归一化到自身最大值，图例标注实际峰值
-class ChartDrawer extends Control:
-	var series: Array = []  # [{hp, gold, dps}, ...]
-	var title := ""
-
-	var cn_font := SystemFont.new()
-
-	func _ready() -> void:
-		cn_font.font_names = PackedStringArray(["PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "sans-serif"])
-		set_anchors_preset(Control.PRESET_FULL_RECT)
-
-	func _draw() -> void:
-		var m := Vector2(150, 110)  # 边距
-		var size_v := Vector2(1920, 1080)
-		var plot_size := size_v - m * 2.0 - Vector2(40, 40)
-		# 背景
-		draw_rect(Rect2(Vector2.ZERO, size_v), Color(0.09, 0.11, 0.08))
-		var font := ThemeDB.fallback_font
-		draw_string(cn_font, m + Vector2(0, -30), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color(0.95, 0.82, 0.4))
-		# 坐标轴与网格（纵轴 = 波次序号，横轴 = 时间？改为：横轴 波次，纵轴 归一化强度）
-		var n := series.size()
-		draw_line(m, m + Vector2(plot_size.x, plot_size.y), Color(0.7, 0.7, 0.7), 2.0)
-		draw_line(m, m + Vector2(0, plot_size.y), Color(0.7, 0.7, 0.7), 2.0)
-		for g in range(1, 5):
-			var gy := m.y + plot_size.y * g / 5.0
-			draw_line(m + Vector2(0, plot_size.y * g / 5.0), m + Vector2(plot_size.x, plot_size.y * g / 5.0), Color(1, 1, 1, 0.08), 1.0)
-			draw_string(cn_font, m + Vector2(-56, gy + 6), "%d%%" % (100 - g * 20), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.8, 0.8, 0.8))
-		# 横轴波次刻度
-		for w in range(n):
-			if n > 14 and w % 2 == 1:
-				continue
-			var wx := m.x + plot_size.x * (w + 0.5) / n
-			draw_string(cn_font, Vector2(wx - 10, m.y + plot_size.y + 30), str(w + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.8, 0.8, 0.8))
-		draw_string(cn_font, m + Vector2(plot_size.x / 2.0 - 40, m.y + plot_size.y + 62), "波次", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.8, 0.8, 0.8))
-		# 三条曲线
-		var defs := [
-			{"key": "hp", "color": Color(0.95, 0.35, 0.3), "label": "敌方总血量"},
-			{"key": "dps", "color": Color(0.4, 0.7, 1.0), "label": "玩家预期输出"},
-			{"key": "gold", "color": Color(1.0, 0.85, 0.3), "label": "敌方赏金"},
-		]
-		var li := 0
-		for def in defs:
-			var vals: Array = []
-			var vmax := 0.001
-			for d in series:
-				vals.append(float(d[def["key"]]))
-				vmax = maxf(vmax, float(d[def["key"]]))
-			var pts := PackedVector2Array()
-			for i in range(n):
-				pts.append(m + Vector2(plot_size.x * (i + 0.5) / n, plot_size.y * (1.0 - vals[i] / vmax)))
-			draw_polyline(pts, def["color"], 4.0)
-			for p in pts:
-				draw_circle(p, 5.0, def["color"])
-			# 图例
-			var ly := m.y + 10.0 + li * 34.0
-			draw_circle(Vector2(size_v.x - 330, ly), 8.0, def["color"])
-			draw_string(cn_font, Vector2(size_v.x - 310, ly + 8), "%s（峰值 %.0f）" % [def["label"], vmax],
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.92, 0.92, 0.92))
-			li += 1
-
 class ShockRing extends Node2D:
 	var t := 0.0
 
@@ -1481,15 +1210,15 @@ func _flash_red() -> void:
 
 # ---------- 工具 ----------
 
-const DMG_TYPE_NAMES := {"physical": "物理", "magic": "魔法"}
+
 
 
 func _tower_stats_text(t) -> String:
-	var lv: Dictionary = TOWER_TYPES[t.type]["levels"][t.level - 1]
+	var lv: Dictionary = LevelData.TOWER_TYPES[t.type]["levels"][t.level - 1]
 	if t.type == "barracks":
 		return "士兵 ×%d · 生命 %d · 攻击 %d（物理）\n补兵 %d 秒 · 在集合点拦截敌人" % [
 			lv["soldiers"], int(lv["soldier_hp"]), int(lv["soldier_dmg"]), int(lv["respawn"])]
-	var text := "伤害 %d · 攻速 %.1f/秒 · 射程 %d\n%s伤害" % [lv["damage"], 1.0 / lv["rate"], int(lv["range"]), DMG_TYPE_NAMES[t.damage_type]]
+	var text := "伤害 %d · 攻速 %.1f/秒 · 射程 %d\n%s伤害" % [lv["damage"], 1.0 / lv["rate"], int(lv["range"]), LevelData.DMG_TYPE_NAMES[t.damage_type]]
 	if lv.has("splash"):
 		text += " · 溅射半径 %d" % int(lv["splash"])
 	if lv.has("slow_pct"):
@@ -1500,7 +1229,7 @@ func _tower_stats_text(t) -> String:
 
 
 func _tower_upgrade_preview(t) -> String:
-	var levels: Array = TOWER_TYPES[t.type]["levels"]
+	var levels: Array = LevelData.TOWER_TYPES[t.type]["levels"]
 	var cur: Dictionary = levels[t.level - 1]
 	var nxt: Dictionary = levels[t.level]
 	if t.type == "barracks":
@@ -1525,7 +1254,7 @@ func _build_chart_data() -> Array:
 		var total_hp := 0.0
 		var wave_gold := 0.0
 		for group: Dictionary in waves[w]:
-			var d: Dictionary = ENEMY_TYPES[group["type"]]
+			var d: Dictionary = LevelData.ENEMY_TYPES[group["type"]]
 			total_hp += d["hp"] * hp_scale * group["count"]
 			wave_gold += d["reward"] * group["count"]
 		cum_gold += wave_gold + 15.0 + 5.0 * (w + 1)
@@ -1556,7 +1285,7 @@ func _wave_preview_text() -> String:
 		counts[ty] = counts.get(ty, 0) + int(group["count"])
 	var parts: Array = []
 	for ty in counts:
-		parts.append("%s×%d" % [ENEMY_NAMES.get(ty, ty), counts[ty]])
+		parts.append("%s×%d" % [LevelData.ENEMY_NAMES.get(ty, ty), counts[ty]])
 	parts.sort()
 	return "第 %d 波：%s" % [next_wave + 1, " ".join(parts)]
 
@@ -1958,7 +1687,7 @@ func game_over(win: bool) -> void:
 		star_label.add_theme_color_override("font_color", Color("f1c40f"))
 		star_label.text = "★".repeat(earned) + "☆".repeat(3 - earned)
 		vbox.add_child(star_label)
-	if win and level_index < LEVELS.size() - 1:
+	if win and level_index < LevelData.LEVELS.size() - 1:
 		var next_btn := Button.new()
 		next_btn.text = "下一关"
 		next_btn.custom_minimum_size = Vector2(200, 52)

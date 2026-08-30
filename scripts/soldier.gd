@@ -13,7 +13,6 @@ var target: Node2D = null
 var dead := false
 var sprite: Sprite2D
 var tint := Color(0.6, 0.78, 1.45)
-var base_rot := 0.0
 var anim_time := 0.0
 
 const ENGAGE := 85.0  # 集合点周围的接敌半径
@@ -53,7 +52,6 @@ func _process(delta: float) -> void:
 		target = _pick_target()
 	if target != null:
 		var d: Vector2 = target.global_position - global_position
-		base_rot = d.angle()
 		if d.length() > 13.0:
 			global_position += d.normalized() * speed * delta
 		elif attack_cd <= 0.0:

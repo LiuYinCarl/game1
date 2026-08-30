@@ -12,18 +12,18 @@ static func run(main: Node) -> int:
 
 	# ---------- 关卡数据 ----------
 	checks += 1
-	if main.LEVELS.size() != 20:
-		failures.append("关卡数量应为 20，实际 %d" % main.LEVELS.size())
+	if LevelData.LEVELS.size() != 20:
+		failures.append("关卡数量应为 20，实际 %d" % LevelData.LEVELS.size())
 	checks += 1
 	var names := {}
-	for L in main.LEVELS:
+	for L in LevelData.LEVELS:
 		names[L["name"]] = names.get(L["name"], 0) + 1
 	for n in names:
 		if names[n] > 1:
 			failures.append("关卡名重复: " + str(n))
 
 	# 逐关加载并校验
-	for i in range(main.LEVELS.size()):
+	for i in range(LevelData.LEVELS.size()):
 		main._load_level(i)
 		var tag := "L%d(%s)" % [i + 1, main.level_name]
 
@@ -84,7 +84,7 @@ static func run(main: Node) -> int:
 				wave_err = "第 %d 波为空" % (w + 1)
 				break
 			for group: Dictionary in wave:
-				if not main.ENEMY_TYPES.has(group["type"]):
+				if not LevelData.ENEMY_TYPES.has(group["type"]):
 					wave_err = "第 %d 波含未知敌人 %s" % [w + 1, group["type"]]
 					break
 				var pi: int = group.get("path", 0)
@@ -129,7 +129,7 @@ static func run(main: Node) -> int:
 	# ---------- 升级费用表 ----------
 	for key in ["archer", "mage", "cannon", "barracks", "frost"]:
 		var t = load("res://scripts/tower.gd").new()
-		t.setup(key, main.TOWER_TYPES[key])
+		t.setup(key, LevelData.TOWER_TYPES[key])
 		checks += 1
 		var c1: int = t.upgrade_cost()
 		t.apply_upgrade()

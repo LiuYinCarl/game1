@@ -35,8 +35,6 @@ var slow_time := 0.0
 var pierce := 0  # 箭塔 3 级技能：穿透额外目标数
 var turret: Sprite2D
 var last_target: Node2D = null
-var idle_phase := 0.0
-var elapsed := 0.0
 
 # 兵营专用
 var rally_point := Vector2.ZERO
@@ -90,10 +88,7 @@ const WEAPON_OFFSET := Vector2(0, -30)
 
 
 func _ready() -> void:
-	# 扫视相位按位置错开，避免所有塔同步摆动
-	idle_phase = position.x * 0.01 + position.y * 0.013
-
-
+	pass
 func _refresh() -> void:
 	var lv: Dictionary = stats_levels[level - 1]
 	current_damage = lv.get("damage", 0.0)
@@ -153,7 +148,6 @@ func _slot_offset(i: int, n: int) -> Vector2:
 
 
 func _process(delta: float) -> void:
-	elapsed += delta
 	if type == "barracks":
 		_process_barracks(delta)
 		return
