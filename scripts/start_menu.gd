@@ -87,12 +87,17 @@ void fragment() {
 	th.default_font_size = 18
 	theme = th
 
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
+	# 根布局：标题/退出固定，关卡网格放滚动容器（关卡再多也能看到）
+	var root := MarginContainer.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_theme_constant_override("margin_top", 26)
+	root.add_theme_constant_override("margin_bottom", 22)
+	root.add_theme_constant_override("margin_left", 40)
+	root.add_theme_constant_override("margin_right", 40)
+	add_child(root)
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 26)
-	center.add_child(vbox)
+	vbox.add_theme_constant_override("separation", 18)
+	root.add_child(vbox)
 
 	var title := Label.new()
 	title.text = "王国塔防"
@@ -115,12 +120,22 @@ void fragment() {
 	subtitle.add_theme_constant_override("outline_size", 6)
 	vbox.add_child(subtitle)
 
+	# 关卡网格：可滚动，水平居中
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+	# 水平居中容器（垂直顶对齐：内容超出时可完整滚到顶部）
+	var cc := CenterContainer.new()
+	cc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cc.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	scroll.add_child(cc)
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 22)
 	grid.add_theme_constant_override("v_separation", 22)
-	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	vbox.add_child(grid)
+	cc.add_child(grid)
 	for i in LEVEL_NAMES.size():
 		grid.add_child(_make_level_card(i))
 
