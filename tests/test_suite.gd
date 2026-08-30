@@ -127,7 +127,7 @@ static func run(main: Node) -> int:
 	e.free()
 
 	# ---------- 升级费用表 ----------
-	for key in ["archer", "mage", "cannon", "barracks"]:
+	for key in ["archer", "mage", "cannon", "barracks", "frost"]:
 		var t = load("res://scripts/tower.gd").new()
 		t.setup(key, main.TOWER_TYPES[key])
 		checks += 1

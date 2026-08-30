@@ -6,6 +6,10 @@ var speed := 300.0
 var damage := 0.0
 var damage_type := "physical"
 var splash := 0.0
+var slow_pct := 0.0  # 命中减速（冰霜塔）
+var slow_time := 0.0
+var pierce := 0  # 穿透：命中后继续飞向附近的下一个目标（箭塔 3 级）
+var hit_list: Array = []
 var hit_tex: Texture2D = null
 var hit_size := 0.03
 var sprite: Sprite2D
@@ -69,6 +73,22 @@ func _process(delta: float) -> void:
 			trail.remove_point(0)
 	if d.length() <= step + 4.0:
 		_hit(tp)
+		# 穿透：命中后飞向附近的下一个未命中目标
+		if pierce > 0:
+			pierce -= 1
+			hit_list.append(target)
+			var nxt: Node2D = null
+			var nd := INF
+			for e in get_tree().get_nodes_in_group("enemies"):
+				if not is_instance_valid(e) or e.dead or e in hit_list:
+					continue
+				var dd: float = e.global_position.distance_to(global_position)
+				if dd <= 80.0 and dd < nd:
+					nd = dd
+					nxt = e
+			if nxt != null:
+				target = nxt
+				return
 		queue_free()
 	else:
 		global_position += d.normalized() * step
@@ -94,3 +114,5 @@ func _hit(pos: Vector2) -> void:
 			"size": hit_size, "gravity": 300.0, "lifetime": 0.35, "add": true, "rand_angle": true})
 		if is_instance_valid(target):
 			target.take_damage(damage, damage_type)
+			if slow_pct > 0.0:
+				target.apply_slow(slow_pct, slow_time)

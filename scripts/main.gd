@@ -172,7 +172,8 @@ var ENEMY_TYPES := {
 
 const TOWER_ROLE := {
 	"archer": "单体速射 · 物理伤害", "mage": "高伤爆发 · 魔法伤害",
-	"cannon": "范围溅射 · 物理伤害", "barracks": "派出士兵拦截敌人",
+	"cannon": "范围溅射 · 物理伤害", "frost": "减速控场 · 魔法伤害",
+	"barracks": "派出士兵拦截敌人",
 }
 
 # 塔的数值按等级显式成表：damage 伤害 / rate 开火间隔（秒）/ range 射程 / splash 溅射半径，
@@ -185,7 +186,7 @@ var TOWER_TYPES := {
 		"levels": [
 			{"damage": 9.0, "rate": 0.45, "range": 200.0},
 			{"damage": 14.0, "rate": 0.40, "range": 212.0, "cost": 60},
-			{"damage": 22.0, "rate": 0.35, "range": 224.0, "cost": 95},
+			{"damage": 22.0, "rate": 0.35, "range": 224.0, "cost": 95, "pierce": 1},
 		],
 		"base": preload("res://assets/spire/tower_archer_base.png"),
 		"weapons": [preload("res://assets/spire/tower_archer_w1.png"), preload("res://assets/spire/tower_archer_w2.png"), preload("res://assets/spire/tower_archer_w3.png")],
@@ -214,6 +215,18 @@ var TOWER_TYPES := {
 		"weapon_frames": 6, "weapon_scale": 0.95,
 		"projs": [preload("res://assets/spire/tower_cannon_p1.png"), preload("res://assets/spire/tower_cannon_p2.png"), preload("res://assets/spire/tower_cannon_p3.png")],
 		"proj_size": 26.0},
+	"frost": {"name": "冰霜塔", "cost": 90, "damage_type": "magic", "proj_speed": 380.0, "color": Color("5ab8d8"),
+		"slow_time": 2.0,
+		"levels": [
+			{"damage": 5.0, "rate": 1.0, "range": 200.0, "slow_pct": 0.4},
+			{"damage": 9.0, "rate": 0.95, "range": 212.0, "slow_pct": 0.5, "cost": 80},
+			{"damage": 14.0, "rate": 0.9, "range": 224.0, "slow_pct": 0.6, "cost": 130},
+		],
+		"base": preload("res://assets/spire/tower_frost_base.png"),
+		"weapons": [preload("res://assets/spire/tower_frost_w1.png"), preload("res://assets/spire/tower_frost_w2.png"), preload("res://assets/spire/tower_frost_w3.png")],
+		"weapon_frames": [6, 7, 9], "weapon_scale": 0.9,
+		"projs": [preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png")],
+		"proj_size": 22.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/spark_05.png"},
 	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
 		"levels": [
 			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
@@ -887,7 +900,7 @@ func start_wave() -> void:
 
 
 func _smoke_build() -> void:
-	var order := ["archer", "cannon", "mage", "barracks"]
+	var order := ["archer", "cannon", "mage", "barracks", "frost"]
 	var n := 0
 	for i in build_spots.size():
 		if towers.has(i):
@@ -1215,6 +1228,9 @@ func _on_tower_fired(tower, target) -> void:
 		"lifetime": 0.12, "add": true, "gravity": 0.0, "angle_deg": rad_to_deg(dir.angle()) + 90.0})
 	var p = Projectile.new()
 	p.setup(tower.global_position, target, tower.proj_speed, tower.current_damage, tower.splash, tower.proj_tex, tower.proj_size, tower.hit_tex, tower.hit_size, tower.damage_type)
+	p.slow_pct = tower.slow_pct
+	p.slow_time = tower.slow_time
+	p.pierce = tower.pierce
 	add_child(p)
 
 
@@ -1476,6 +1492,10 @@ func _tower_stats_text(t) -> String:
 	var text := "伤害 %d · 攻速 %.1f/秒 · 射程 %d\n%s伤害" % [lv["damage"], 1.0 / lv["rate"], int(lv["range"]), DMG_TYPE_NAMES[t.damage_type]]
 	if lv.has("splash"):
 		text += " · 溅射半径 %d" % int(lv["splash"])
+	if lv.has("slow_pct"):
+		text += "\n命中减速 %d%%（%.0f 秒）· 群体控场" % [int(lv["slow_pct"] * 100), t.slow_time]
+	if t.pierce > 0:
+		text += "\n穿透：弹道可命中 %d 个目标" % (t.pierce + 1)
 	return text
 
 
@@ -1491,6 +1511,8 @@ func _tower_upgrade_preview(t) -> String:
 		"射程 %d→%d" % [int(cur["range"]), int(nxt["range"])]]
 	if nxt.has("splash"):
 		parts.append("溅射 %d→%d" % [int(cur.get("splash", 0.0)), int(nxt["splash"])])
+	if nxt.get("pierce", 0) > 0:
+		parts.append("解锁穿透")
 	return " · ".join(parts)
 
 
@@ -1559,6 +1581,7 @@ const SFX_TABLE := {
 	"shoot": {"file": "res://assets/sfx/sfx_shoot_arrow.ogg", "volume": -6.0},
 	"shoot_mage": {"file": "res://assets/sfx/sfx_shoot_mage.ogg", "volume": -6.0},
 	"shoot_cannon": {"file": "res://assets/sfx/sfx_shoot_cannon.ogg", "volume": -5.0},
+	"shoot_frost": {"file": "res://assets/sfx/sfx_hit_magic.ogg", "volume": -8.0},
 	"hit": {"file": "res://assets/sfx/sfx_hit.ogg", "volume": -12.0},
 	"hit_magic": {"file": "res://assets/sfx/sfx_hit_magic.ogg", "volume": -10.0},
 	"explosion": {"file": "res://assets/sfx/sfx_explosion.ogg", "volume": -6.0},

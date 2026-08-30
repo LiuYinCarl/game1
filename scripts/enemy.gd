@@ -27,6 +27,8 @@ var dead := false
 var blocked_by: Node2D = null  # 拦截自己的士兵，非空时驻停作战
 var attack_cd := 0.0
 var selected := false
+var speed_mult := 1.0  # 减速倍率（<1 为被减速）
+var slow_timer := 0.0
 
 var sprite: Sprite2D
 var anim_time := 0.0
@@ -65,10 +67,22 @@ func setup(type_name: String, pts: PackedVector2Array, data: Dictionary, hp_scal
 	tw.tween_property(sprite, "scale", Vector2.ONE * sprite_scale, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
+## 冰霜减速：持续时间结束自动恢复
+func apply_slow(pct: float, duration: float) -> void:
+	speed_mult = minf(speed_mult, 1.0 - pct) if slow_timer > 0.0 else 1.0 - pct
+	slow_timer = maxf(slow_timer, duration)
+	sprite.modulate = tint.lerp(Color(0.55, 0.8, 2.0), 0.55)
+
+
 func _process(delta: float) -> void:
 	if dead:
 		return
 	attack_cd -= delta
+	if slow_timer > 0.0:
+		slow_timer -= delta
+		if slow_timer <= 0.0:
+			speed_mult = 1.0
+			sprite.modulate = tint
 	# 被士兵拦截：驻停对拼，不推进
 	if blocked_by != null:
 		if not is_instance_valid(blocked_by):
@@ -82,7 +96,7 @@ func _process(delta: float) -> void:
 				attack_cd = 1.15
 				blocked_by.take_damage(soldier_dmg)
 			return
-	var move := speed * delta
+	var move := speed * speed_mult * delta
 	while move > 0.0:
 		var left := seg_lengths[seg] - seg_progress
 		if move < left:

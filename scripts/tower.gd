@@ -27,9 +27,12 @@ var splash := 0.0
 var cooldown := 0.0
 var base: Sprite2D
 var weapons: Array = []
-var weapon_frames := 0
+var weapon_frames_arr: Array = []  # 各级武器帧数（可不同）
 var weapon_scale := 1.0
 var projs: Array = []
+var slow_pct := 0.0  # 冰霜塔：命中减速幅度/时长
+var slow_time := 0.0
+var pierce := 0  # 箭塔 3 级技能：穿透额外目标数
 var turret: Sprite2D
 var last_target: Node2D = null
 var idle_phase := 0.0
@@ -65,13 +68,16 @@ func setup(type_name: String, data: Dictionary) -> void:
 	base.frame = 0
 	add_child(base)
 	weapons = data.get("weapons", [null, null, null])
-	weapon_frames = int(data.get("weapon_frames", 0))
+	var wf = data.get("weapon_frames", 0)
+	weapon_frames_arr = wf if wf is Array else [wf, wf, wf]
 	weapon_scale = float(data.get("weapon_scale", 1.0))
 	projs = data.get("projs", [proj_tex, proj_tex, proj_tex])
+	slow_pct = data.get("slow_pct", 0.0)
+	slow_time = data.get("slow_time", 0.0)
 	turret = Sprite2D.new()
 	if weapons[0] != null:
 		turret.texture = weapons[0]
-		turret.hframes = weapon_frames
+		turret.hframes = weapon_frames_arr[0]
 		turret.frame = 0
 		turret.position = WEAPON_OFFSET
 		turret.scale = Vector2.ONE * weapon_scale
@@ -94,11 +100,12 @@ func _refresh() -> void:
 	fire_rate = lv.get("rate", 1.0)
 	current_range = lv.get("range", 0.0)
 	splash = lv.get("splash", 0.0)
+	pierce = lv.get("pierce", 0)
 	# 等级外观：底座换帧 + 换武器贴图
 	base.frame = level - 1
 	if weapons[level - 1] != null:
 		turret.texture = weapons[level - 1]
-		turret.hframes = weapon_frames
+		turret.hframes = weapon_frames_arr[level - 1]
 		turret.frame = 0
 	if projs[level - 1] != null:
 		proj_tex = projs[level - 1]
@@ -164,11 +171,12 @@ func _process(delta: float) -> void:
 
 ## 播放武器攻击动画（帧序列播一遍后回到待机的第 0 帧）
 func _play_attack_anim() -> void:
-	if weapon_frames <= 1 or not is_instance_valid(turret) or turret.texture == null:
+	var frames := int(weapon_frames_arr[level - 1])
+	if frames <= 1 or not is_instance_valid(turret) or turret.texture == null:
 		return
 	var tw := create_tween()
-	tw.tween_method(func(f: int) -> void: turret.frame = clampi(f, 0, weapon_frames - 1),
-		0, weapon_frames - 1, 0.22)
+	tw.tween_method(func(f: int) -> void: turret.frame = clampi(f, 0, frames - 1),
+		0, frames - 1, 0.22)
 	tw.tween_callback(func() -> void: turret.frame = 0)
 
 
