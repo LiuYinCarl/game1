@@ -23,6 +23,12 @@ godot --headless --path . scenes/main.tscn --quit-after 18000 -- --smoke --level
 
 # 截图模式：自动建塔开波，输出截图到 /tmp/tafang_*.png（对开始界面同样有效）
 godot --path . scenes/main.tscn --quit-after 700 -- --shot --level=0
+
+# 自动化测试套件（189 项检查，退出码反映结果，可接 CI）
+godot --headless --path . scenes/main.tscn --quit-after 600 -- --test
+
+# 难度曲线图：输出第 N 关的敌我强度曲线到 /tmp/tafang_chart_LN.png
+godot --path . scenes/main.tscn --quit-after 400 -- --chart=13
 ```
 
 ## 打包发布

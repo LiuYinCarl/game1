@@ -28,69 +28,90 @@ var SCREEN := Vector2(1920, 1080)
 
 # 六关数据目录。hand=true 使用手工波次 WAVES_L1，否则用 gen=[波数, 预算] 参数化生成
 var LEVELS := [
-	{
-		"name": "翠绿小径", "gold": 230, "lives": 20, "hp_growth": 0.07, "hand": true,
-		"path": [Vector2(-60, 200), Vector2(480, 200), Vector2(480, 780), Vector2(960, 780),
-			Vector2(960, 320), Vector2(1400, 320), Vector2(1400, 820), Vector2(1980, 820)],
-		"spots": [Vector2(300, 340), Vector2(300, 80), Vector2(640, 140), Vector2(640, 500),
-			Vector2(340, 870), Vector2(640, 940), Vector2(800, 600), Vector2(1100, 480),
-			Vector2(1100, 150), Vector2(840, 320), Vector2(1540, 200), Vector2(1540, 600),
-			Vector2(1280, 930), Vector2(1600, 960), Vector2(1700, 650)],
-	},
-	{
-		"name": "河畔弯道", "gold": 240, "lives": 20, "hp_growth": 0.09, "gen": [9, 60.0],
-		"path": [Vector2(-60, 860), Vector2(420, 860), Vector2(420, 300), Vector2(840, 300),
-			Vector2(840, 700), Vector2(1280, 700), Vector2(1280, 240), Vector2(1980, 240)],
-		"spots": [Vector2(240, 700), Vector2(240, 960), Vector2(580, 440), Vector2(580, 140),
-			Vector2(580, 860), Vector2(1000, 540), Vector2(1000, 860), Vector2(960, 160),
-			Vector2(1440, 400), Vector2(1440, 780), Vector2(1440, 80), Vector2(1700, 400)],
-	},
-	{
-		"name": "回旋谷", "gold": 250, "lives": 20, "hp_growth": 0.105, "gen": [9, 70.0],
-		"path": [Vector2(-60, 540), Vector2(300, 540), Vector2(300, 180), Vector2(1500, 180),
-			Vector2(1500, 900), Vector2(700, 900), Vector2(700, 540), Vector2(1100, 540),
-			Vector2(1100, 740), Vector2(1980, 740)],
-		"spots": [Vector2(140, 400), Vector2(140, 680), Vector2(460, 320), Vector2(460, 60),
-			Vector2(900, 60), Vector2(1340, 60), Vector2(1660, 320), Vector2(1660, 700),
-			Vector2(1300, 760), Vector2(880, 1000), Vector2(540, 760), Vector2(880, 640),
-			Vector2(1250, 560), Vector2(1300, 880), Vector2(1660, 880)],
-	},
-	{
-		"name": "双峰峡谷", "gold": 260, "lives": 20, "hp_growth": 0.12, "gen": [10, 78.0],
-		"path": [Vector2(-60, 240), Vector2(560, 240), Vector2(560, 500), Vector2(1100, 500),
-			Vector2(1100, 760), Vector2(1600, 760), Vector2(1600, 480), Vector2(1980, 480)],
-		"spots": [Vector2(380, 120), Vector2(380, 400), Vector2(720, 360), Vector2(720, 660),
-			Vector2(940, 640), Vector2(940, 340), Vector2(1250, 400), Vector2(1250, 660),
-			Vector2(1250, 900), Vector2(1450, 620), Vector2(1750, 620), Vector2(1750, 340),
-			Vector2(1450, 900)],
-	},
-	{
-		"name": "迷雾沼泽", "gold": 270, "lives": 20, "hp_growth": 0.13, "gen": [10, 88.0],
-		"path": [Vector2(-60, 180), Vector2(360, 180), Vector2(360, 420), Vector2(760, 420),
-			Vector2(760, 180), Vector2(1160, 180), Vector2(1160, 600), Vector2(560, 600),
-			Vector2(560, 880), Vector2(1560, 880), Vector2(1560, 560), Vector2(1980, 560)],
-		"spots": [Vector2(200, 60), Vector2(200, 300), Vector2(520, 300), Vector2(520, 540),
-			Vector2(920, 300), Vector2(920, 60), Vector2(1330, 300), Vector2(1240, 60),
-			Vector2(1000, 480), Vector2(800, 480), Vector2(400, 760), Vector2(720, 760),
-			Vector2(1000, 760), Vector2(1330, 760), Vector2(1400, 1000), Vector2(1700, 700),
-			Vector2(1700, 420)],
-	},
-	{
-		"name": "王城决战", "gold": 300, "lives": 20, "hp_growth": 0.15, "gen": [12, 95.0],
-		"path": [Vector2(-60, 600), Vector2(240, 600), Vector2(240, 240), Vector2(720, 240),
-			Vector2(720, 600), Vector2(1200, 600), Vector2(1200, 240), Vector2(1680, 240),
-			Vector2(1680, 700), Vector2(1980, 700)],
-		"spots": [Vector2(120, 420), Vector2(120, 760), Vector2(400, 400), Vector2(400, 120),
-			Vector2(560, 400), Vector2(640, 720), Vector2(880, 480), Vector2(880, 760),
-			Vector2(1000, 480), Vector2(1360, 400), Vector2(1360, 120), Vector2(1520, 120),
-			Vector2(1520, 480), Vector2(1800, 480)],
-	},
+	# paths: 1-3 条路径（可共享尾段汇聚到王城）；gen: [波数, 预算]；seed: 建造点生成种子
+	{"name": "翠绿小径", "gold": 230, "lives": 20, "hp_growth": 0.06, "gen": [8, 55.0], "seed": 1, "paths": [[
+		Vector2(-60, 220), Vector2(480, 220), Vector2(480, 760), Vector2(1000, 760),
+		Vector2(1000, 320), Vector2(1520, 320), Vector2(1520, 800), Vector2(1980, 800)]]},
+	{"name": "蜿蜒河谷", "gold": 240, "lives": 20, "hp_growth": 0.065, "gen": [8, 59.0], "seed": 2, "paths": [[
+		Vector2(-60, 560), Vector2(340, 560), Vector2(620, 300), Vector2(1020, 300),
+		Vector2(1280, 580), Vector2(1620, 580), Vector2(1800, 780), Vector2(1980, 780)]]},
+	{"name": "林地阶梯", "gold": 250, "lives": 20, "hp_growth": 0.07, "gen": [9, 63.0], "seed": 3, "paths": [[
+		Vector2(-60, 160), Vector2(340, 160), Vector2(560, 380), Vector2(880, 380),
+		Vector2(1100, 620), Vector2(1420, 620), Vector2(1620, 840), Vector2(1980, 840)]]},
+	{"name": "双子河口", "gold": 260, "lives": 20, "hp_growth": 0.075, "gen": [9, 67.0], "seed": 4, "paths": [
+		[Vector2(-60, 260), Vector2(680, 260), Vector2(680, 580), Vector2(1280, 580), Vector2(1280, 760), Vector2(1980, 760)],
+		[Vector2(-60, 900), Vector2(680, 900), Vector2(680, 580), Vector2(1280, 580), Vector2(1280, 760), Vector2(1980, 760)]]},
+	{"name": "回环林地", "gold": 270, "lives": 20, "hp_growth": 0.08, "gen": [9, 71.0], "seed": 5, "paths": [[
+		Vector2(-60, 180), Vector2(1560, 180), Vector2(1560, 900), Vector2(420, 900),
+		Vector2(420, 440), Vector2(1180, 440), Vector2(1180, 680), Vector2(1980, 680)]]},
+	{"name": "峡谷要道", "gold": 280, "lives": 20, "hp_growth": 0.085, "gen": [10, 75.0], "seed": 6, "paths": [[
+		Vector2(-60, 900), Vector2(300, 900), Vector2(300, 540), Vector2(700, 540), Vector2(700, 240),
+		Vector2(1150, 240), Vector2(1150, 600), Vector2(1560, 600), Vector2(1560, 300), Vector2(1980, 300)]]},
+	{"name": "双子河谷", "gold": 290, "lives": 20, "hp_growth": 0.09, "gen": [10, 79.0], "seed": 7, "paths": [
+		[Vector2(-60, 320), Vector2(620, 320), Vector2(620, 640), Vector2(1300, 640), Vector2(1300, 300),
+			Vector2(1700, 300), Vector2(1700, 560), Vector2(1980, 560)],
+		[Vector2(-60, 880), Vector2(620, 880), Vector2(620, 640), Vector2(1300, 640), Vector2(1300, 300),
+			Vector2(1700, 300), Vector2(1700, 560), Vector2(1980, 560)]]},
+	{"name": "山道盘旋", "gold": 300, "lives": 20, "hp_growth": 0.095, "gen": [10, 83.0], "seed": 8, "paths": [[
+		Vector2(-60, 140), Vector2(1700, 140), Vector2(1700, 420), Vector2(340, 420),
+		Vector2(340, 700), Vector2(1400, 700), Vector2(1400, 930), Vector2(1980, 930)]]},
+	{"name": "三岔峡谷", "gold": 310, "lives": 20, "hp_growth": 0.10, "gen": [11, 87.0], "seed": 9, "paths": [
+		[Vector2(-60, 180), Vector2(560, 180), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
+			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)],
+		[Vector2(-60, 540), Vector2(560, 540), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
+			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)],
+		[Vector2(-60, 900), Vector2(560, 900), Vector2(560, 470), Vector2(1100, 470), Vector2(1100, 720),
+			Vector2(1700, 720), Vector2(1700, 860), Vector2(1980, 860)]]},
+	{"name": "帝国大道", "gold": 320, "lives": 20, "hp_growth": 0.105, "gen": [11, 91.0], "seed": 10, "paths": [[
+		Vector2(-60, 540), Vector2(500, 540), Vector2(760, 380), Vector2(1180, 380),
+		Vector2(1420, 600), Vector2(1980, 600)]]},
+	{"name": "沼泽双径", "gold": 330, "lives": 20, "hp_growth": 0.11, "gen": [11, 95.0], "seed": 11, "paths": [
+		[Vector2(-60, 240), Vector2(520, 240), Vector2(520, 520), Vector2(1080, 520), Vector2(1080, 300),
+			Vector2(1620, 300), Vector2(1620, 560), Vector2(1980, 560)],
+		[Vector2(-60, 860), Vector2(900, 860), Vector2(900, 660), Vector2(1080, 660), Vector2(1080, 520),
+			Vector2(1620, 300), Vector2(1620, 560), Vector2(1980, 560)]]},
+	{"name": "回旋走廊", "gold": 340, "lives": 20, "hp_growth": 0.115, "gen": [12, 99.0], "seed": 12, "paths": [[
+		Vector2(-60, 700), Vector2(420, 700), Vector2(420, 340), Vector2(900, 340), Vector2(900, 760),
+		Vector2(1380, 760), Vector2(1380, 420), Vector2(1980, 420)]]},
+	{"name": "三路会师", "gold": 350, "lives": 20, "hp_growth": 0.12, "gen": [12, 103.0], "seed": 13, "paths": [
+		[Vector2(-60, 200), Vector2(480, 200), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)],
+		[Vector2(-60, 540), Vector2(480, 540), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)],
+		[Vector2(-60, 880), Vector2(480, 880), Vector2(480, 480), Vector2(1000, 480), Vector2(1000, 760), Vector2(1980, 760)]]},
+	{"name": "断桥峡谷", "gold": 360, "lives": 20, "hp_growth": 0.125, "gen": [12, 107.0], "seed": 14, "paths": [
+		[Vector2(-60, 300), Vector2(700, 300), Vector2(960, 560), Vector2(1500, 560), Vector2(1500, 800), Vector2(1980, 800)],
+		[Vector2(-60, 820), Vector2(700, 820), Vector2(960, 560), Vector2(1500, 560), Vector2(1500, 800), Vector2(1980, 800)]]},
+	{"name": "迷雾盘径", "gold": 370, "lives": 20, "hp_growth": 0.13, "gen": [13, 111.0], "seed": 15, "paths": [[
+		Vector2(-60, 160), Vector2(300, 160), Vector2(300, 460), Vector2(760, 460), Vector2(760, 160),
+		Vector2(1240, 160), Vector2(1240, 460), Vector2(1660, 460), Vector2(1660, 780), Vector2(1980, 780)]]},
+	{"name": "三面楚歌", "gold": 380, "lives": 20, "hp_growth": 0.135, "gen": [13, 115.0], "seed": 16, "paths": [
+		[Vector2(-60, 540), Vector2(400, 540), Vector2(400, 300), Vector2(900, 300), Vector2(900, 560),
+			Vector2(1400, 560), Vector2(1400, 780), Vector2(1980, 780)],
+		[Vector2(900, -60), Vector2(900, 300), Vector2(900, 560), Vector2(1400, 560), Vector2(1400, 780), Vector2(1980, 780)],
+		[Vector2(1400, 1140), Vector2(1400, 780), Vector2(1980, 780)]]},
+	{"name": "双龙出海", "gold": 390, "lives": 20, "hp_growth": 0.14, "gen": [13, 119.0], "seed": 17, "paths": [
+		[Vector2(-60, 180), Vector2(1500, 180), Vector2(1500, 540), Vector2(1980, 540)],
+		[Vector2(-60, 900), Vector2(1500, 900), Vector2(1500, 540), Vector2(1980, 540)]]},
+	{"name": "折返迷宫", "gold": 400, "lives": 20, "hp_growth": 0.145, "gen": [13, 123.0], "seed": 18, "paths": [[
+		Vector2(-60, 220), Vector2(460, 220), Vector2(460, 560), Vector2(900, 560), Vector2(900, 220),
+		Vector2(1340, 220), Vector2(1340, 560), Vector2(1980, 560)]]},
+	{"name": "王城三径", "gold": 410, "lives": 20, "hp_growth": 0.15, "gen": [14, 127.0], "seed": 19, "paths": [
+		[Vector2(-60, 300), Vector2(540, 300), Vector2(540, 540), Vector2(1100, 540), Vector2(1100, 300),
+			Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)],
+		[Vector2(-60, 760), Vector2(540, 760), Vector2(540, 540), Vector2(1100, 540), Vector2(1100, 300),
+			Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)],
+		[Vector2(540, -60), Vector2(540, 300), Vector2(1100, 540), Vector2(1600, 300), Vector2(1600, 540), Vector2(1980, 540)]]},
+	{"name": "决战王城", "gold": 430, "lives": 20, "hp_growth": 0.16, "gen": [14, 131.0], "seed": 20, "paths": [
+		[Vector2(-60, 540), Vector2(360, 540), Vector2(360, 260), Vector2(820, 260), Vector2(820, 560),
+			Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)],
+		[Vector2(-60, 120), Vector2(820, 120), Vector2(820, 260), Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)],
+		[Vector2(-60, 960), Vector2(1280, 960), Vector2(1280, 560), Vector2(1280, 300), Vector2(1980, 300)]]},
 ]
 
 # 当前关卡状态（由 _load_level 填充）
 var level_index := 0
 var level_name := ""
-var path_points := PackedVector2Array()
+var path_points := PackedVector2Array()  # 主路径（paths[0]）
+var paths: Array = []  # 全部路径（1-3 条，可共享尾段）
 var build_spots: Array = []
 var castle_pos := Vector2.ZERO
 var waves: Array = []
@@ -307,36 +328,38 @@ class MapDrawer extends Node2D:
 				draw_circle(p, rng.randf_range(2, 8), Color(c.r, c.g, c.b, 0.5))
 
 	func _draw_road() -> void:
-		var pts: PackedVector2Array = main.path_points
 		var rng := RandomNumberGenerator.new()
-		# 路面投影（往下一线，制造浮起感）
-		var shadow := PackedVector2Array()
-		for p in pts:
-			shadow.append(p + Vector2(0, 10))
-		draw_polyline(shadow, Color(0, 0, 0, 0.16), 64.0)
-		for p in shadow:
-			draw_circle(p, 32.0, Color(0, 0, 0, 0.16))
-		# 路肩（深）→ 路面 → 中央磨损带（亮）
-		draw_polyline(pts, Color("8a6a42"), 66.0)
-		for p in pts:
-			draw_circle(p, 33.0, Color("8a6a42"))
-		draw_polyline(pts, Color("c8a76c"), 56.0)
-		for p in pts:
-			draw_circle(p, 28.0, Color("c8a76c"))
-		draw_polyline(pts, Color("d6b87e"), 30.0)
-		for p in pts:
-			draw_circle(p, 15.0, Color("d6b87e"))
-		# 碎石与车辙点缀
 		rng.seed = 5
-		for i in 110:
-			var si := rng.randi_range(0, pts.size() - 2)
-			var p: Vector2 = pts[si].lerp(pts[si + 1], rng.randf())
-			var n := (pts[si + 1] - pts[si]).normalized().orthogonal()
-			p += n * rng.randf_range(-21.0, 21.0)
-			if rng.randf() < 0.7:
-				draw_circle(p, rng.randf_range(1.5, 3.5), Color(0.45, 0.34, 0.2, rng.randf_range(0.25, 0.5)))
-			else:
-				draw_circle(p, rng.randf_range(2.0, 4.0), Color(0.9, 0.8, 0.6, rng.randf_range(0.2, 0.4)))
+		# 每条路径都绘制道路（共享尾段会自然重叠融合）
+		for pts: PackedVector2Array in main.paths:
+			# 路面投影（往下一线，制造浮起感）
+			var shadow := PackedVector2Array()
+			for p in pts:
+				shadow.append(p + Vector2(0, 10))
+			draw_polyline(shadow, Color(0, 0, 0, 0.16), 64.0)
+			for p in shadow:
+				draw_circle(p, 32.0, Color(0, 0, 0, 0.16))
+			# 路肩（深）→ 路面 → 中央磨损带（亮）
+			draw_polyline(pts, Color("8a6a42"), 66.0)
+			for p in pts:
+				draw_circle(p, 33.0, Color("8a6a42"))
+			draw_polyline(pts, Color("c8a76c"), 56.0)
+			for p in pts:
+				draw_circle(p, 28.0, Color("c8a76c"))
+			draw_polyline(pts, Color("d6b87e"), 30.0)
+			for p in pts:
+				draw_circle(p, 15.0, Color("d6b87e"))
+		# 碎石与车辙点缀（散布于所有路径）
+		for pts: PackedVector2Array in main.paths:
+			for i in 110:
+				var si := rng.randi_range(0, pts.size() - 2)
+				var p: Vector2 = pts[si].lerp(pts[si + 1], rng.randf())
+				var n := (pts[si + 1] - pts[si]).normalized().orthogonal()
+				p += n * rng.randf_range(-21.0, 21.0)
+				if rng.randf() < 0.7:
+					draw_circle(p, rng.randf_range(1.5, 3.5), Color(0.45, 0.34, 0.2, rng.randf_range(0.25, 0.5)))
+				else:
+					draw_circle(p, rng.randf_range(2.0, 4.0), Color(0.9, 0.8, 0.6, rng.randf_range(0.2, 0.4)))
 
 	func _draw_spots() -> void:
 		for i in main.build_spots.size():
@@ -380,21 +403,22 @@ class MapDrawer extends Node2D:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	func _draw_portal() -> void:
-		var pts: PackedVector2Array = main.path_points
-		var sp := Vector2(6, pts[0].y)
-		# 洞口晕圈与深渊
-		draw_circle(sp, 54.0, Color(0.08, 0.06, 0.1, 0.25))
-		draw_circle(sp, 40.0, Color("241f2e"))
-		draw_circle(sp, 29.0, Color("151220"))
-		# 环绕的岩石圈
-		for k in 10:
-			var a := TAU * k / 10.0
-			var rp := sp + Vector2(cos(a), sin(a)) * 37.0
-			draw_circle(rp + Vector2(0, 3), 7.5, Color(0, 0, 0, 0.25))
-			draw_circle(rp, 7.0, Color("4a4550"))
-			draw_circle(rp + Vector2(0, -2), 4.5, Color("5f5a6a"))
-		# 内圈幽光
-		draw_arc(sp, 24.0, 0.0, TAU, 32, Color(0.5, 0.35, 0.7, 0.4), 2.0)
+		# 每条路径一个出怪传送门，位于路径起点
+		for pts: PackedVector2Array in main.paths:
+			var sp := pts[0]
+			# 洞口晕圈与深渊
+			draw_circle(sp, 54.0, Color(0.08, 0.06, 0.1, 0.25))
+			draw_circle(sp, 40.0, Color("241f2e"))
+			draw_circle(sp, 29.0, Color("151220"))
+			# 环绕的岩石圈
+			for k in 10:
+				var a := TAU * k / 10.0
+				var rp := sp + Vector2(cos(a), sin(a)) * 37.0
+				draw_circle(rp + Vector2(0, 3), 7.5, Color(0, 0, 0, 0.25))
+				draw_circle(rp, 7.0, Color("4a4550"))
+				draw_circle(rp + Vector2(0, -2), 4.5, Color("5f5a6a"))
+			# 内圈幽光
+			draw_arc(sp, 24.0, 0.0, TAU, 32, Color(0.5, 0.35, 0.7, 0.4), 2.0)
 
 	func _draw_castle() -> void:
 		var c: Vector2 = main.castle_pos
@@ -520,6 +544,25 @@ void fragment() {
 		_debug_toggle_pause()
 		_debug_toggle_pause()
 		Engine.time_scale = 10.0
+	# 战力曲线图：--chart=N 输出第 N 关的敌我强度曲线到 /tmp/tafang_chart_LN.png
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--chart="):
+			_load_level(clampi(int(arg.get_slice("=", 1)) - 1, 0, LEVELS.size() - 1))
+			var chart_layer := CanvasLayer.new()
+			chart_layer.layer = 20
+			add_child(chart_layer)
+			var chart := ChartDrawer.new()
+			chart.series = _build_chart_data()
+			chart.title = "L%d %s 难度曲线" % [level_index + 1, level_name]
+			chart_layer.add_child(chart)
+			_do_chart_capture()
+			return
+	# 自动化测试：--test 运行测试套件并以退出码报告结果
+	if OS.get_cmdline_user_args().has("--test"):
+		var failures: int = load("res://tests/test_suite.gd").new().run(self)
+		print("[TEST] ", "PASSED" if failures == 0 else "FAILED (%d)" % failures)
+		get_tree().quit(0 if failures == 0 else 1)
+		return
 	if OS.get_cmdline_user_args().has("--shot"):
 		gold = 999
 		_build_tower(0, "archer")
@@ -597,13 +640,16 @@ func _load_level(idx: int) -> void:
 	level_index = clampi(idx, 0, LEVELS.size() - 1)
 	var L: Dictionary = LEVELS[level_index]
 	level_name = L["name"]
-	path_points = PackedVector2Array(L["path"])
-	build_spots = L["spots"]
+	paths = []
+	for p in L["paths"]:
+		paths.append(PackedVector2Array(p))
+	path_points = paths[0]
+	build_spots = _generate_spots(paths, int(L.get("seed", idx + 1)))
 	start_gold = L["gold"]
 	start_lives = L["lives"]
 	hp_growth = L["hp_growth"]
-	waves = WAVES_L1.duplicate(true) if L.get("hand", false) else _compose_waves(int(L["gen"][0]), L["gen"][1])
-	# 城堡位置按路径末端方向自动推算
+	waves = _compose_waves(int(L["gen"][0]), L["gen"][1], paths.size())
+	# 城堡位置按主路径末端方向自动推算
 	var last: Vector2 = path_points[path_points.size() - 1]
 	var prev: Vector2 = path_points[path_points.size() - 2]
 	var dir := (last - prev).normalized()
@@ -612,7 +658,56 @@ func _load_level(idx: int) -> void:
 	castle_pos.y = clampf(castle_pos.y, 100.0, SCREEN.y - 60.0)
 
 
-func _compose_waves(count: int, budget0: float) -> Array:
+## 沿各路径自动生成建造点：长路段按间距布点，垂直偏移交替两侧，
+## 过滤出界/过近（<85px）的点，保证全部建造点合法可达
+func _generate_spots(path_list: Array, seed_v: int) -> Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v
+	var spots := []
+	for pts in path_list:
+		for si in range(pts.size() - 1):
+			var a: Vector2 = pts[si]
+			var b: Vector2 = pts[si + 1]
+			var seg_len := a.distance_to(b)
+			if seg_len < 200.0:
+				continue
+			var n := int(seg_len / 300.0) + 1
+			var dir := (b - a).normalized()
+			for k in range(n):
+				var t := (k + 0.5) / n
+				var base := a.lerp(b, t)
+				var side := 1.0 if (si + k) % 2 == 0 else -1.0
+				var off := rng.randf_range(105.0, 140.0) * side
+				var spot := Vector2.ZERO
+				var ok := false
+				# 距离钳制到 50-170px：太远拉近、太近（压到其他路径）推远
+				for attempt in range(5):
+					spot = base + Vector2(-dir.y, dir.x) * off
+					if spot.x < 60.0 or spot.x > SCREEN.x - 60.0 or spot.y < 60.0 or spot.y > SCREEN.y - 60.0:
+						break
+					var d := dist_to_path(spot)
+					if d >= 50.0 and d <= 170.0:
+						ok = true
+						break
+					if d < 50.0:
+						off += (50.0 - d) + 6.0
+					else:
+						off -= (d - 170.0) + 6.0
+				if not ok:
+					continue
+				if spot.x < 60.0 or spot.x > SCREEN.x - 60.0 or spot.y < 60.0 or spot.y > SCREEN.y - 60.0:
+					continue
+				var too_close := false
+				for s in spots:
+					if s.distance_to(spot) < 85.0:
+						too_close = true
+						break
+				if not too_close:
+					spots.append(spot)
+	return spots
+
+
+func _compose_waves(count: int, budget0: float, n_paths := 1) -> Array:
 	# 参数化波次生成：预算随波次指数增长；敌人类型按波次逐步解锁，
 	# share 为该类型在当波预算中的占比，boss 只出现在最后两波
 	var schedule := [
@@ -640,6 +735,7 @@ func _compose_waves(count: int, budget0: float) -> Array:
 			budget -= 150.0
 			groups.append({"type": "troll", "count": 1, "interval": 2.5, "delay": 4.0})
 		var delay := 0.0
+		var gi := 0
 		for entry in schedule:
 			var unlock: int = entry[1]
 			if w < unlock:
@@ -649,8 +745,9 @@ func _compose_waves(count: int, budget0: float) -> Array:
 			if n <= 0:
 				continue
 			groups.append({"type": entry[0], "count": n, "interval": maxf(0.45, 1.1 - w * 0.05),
-				"delay": delay})
+				"delay": delay, "path": (w + gi) % n_paths})
 			delay += 2.0
+			gi += 1
 		result.append(groups)
 	return result
 
@@ -673,7 +770,7 @@ func _process(delta: float) -> void:
 	if wave_active:
 		wave_time += delta
 		while not spawn_events.is_empty() and spawn_events[0]["time"] <= wave_time:
-			spawn_enemy(spawn_events[0]["type"])
+			spawn_enemy(spawn_events[0]["type"], spawn_events[0].get("path", 0))
 			spawn_events.pop_front()
 		if spawn_events.is_empty() and get_tree().get_nodes_in_group("enemies").is_empty():
 			_end_wave()
@@ -760,6 +857,13 @@ func _nearest_path_point(p: Vector2) -> Dictionary:
 func start_wave() -> void:
 	if wave_active or game_ended or next_wave >= waves.size():
 		return
+	# 提前开波奖励：倒计时剩余秒数折成金币
+	if wave_cooldown > 0.0:
+		var bonus := ceili(wave_cooldown)
+		gold += bonus
+		play_sfx("coin")
+		spawn_float_text(Vector2(SCREEN.x / 2.0, SCREEN.y - 130.0), "+%d 金 提前开波" % bonus, Color("f1c40f"))
+		_update_hud()
 	wave_active = true
 	wave_time = 0.0
 	spawn_events.clear()
@@ -767,7 +871,7 @@ func start_wave() -> void:
 	for group in waves[next_wave]:
 		t += group.get("delay", 0.0)
 		for i in group["count"]:
-			spawn_events.append({"time": t, "type": group["type"]})
+			spawn_events.append({"time": t, "type": group["type"], "path": group.get("path", 0)})
 			t += group["interval"]
 	spawn_hp_scale = 1.0 + hp_growth * next_wave
 	next_wave += 1
@@ -815,9 +919,10 @@ func _end_wave() -> void:
 	_update_hud()
 
 
-func spawn_enemy(type_name: String) -> void:
+func spawn_enemy(type_name: String, path_idx := 0) -> void:
 	var e = Enemy.new()
-	e.setup(type_name, path_points, ENEMY_TYPES[type_name], spawn_hp_scale)
+	var pts: PackedVector2Array = paths[path_idx] if path_idx < paths.size() else path_points
+	e.setup(type_name, pts, ENEMY_TYPES[type_name], spawn_hp_scale)
 	e.died.connect(_on_enemy_died)
 	e.reached_end.connect(_on_enemy_reached_end)
 	add_child(e)
@@ -1255,6 +1360,66 @@ func spawn_explosion(pos: Vector2) -> void:
 		"ramp": [[0.0, Color(0.3, 0.3, 0.3, 0.55)], [0.7, Color(0.4, 0.4, 0.4, 0.3)], [1.0, Color(0.5, 0.5, 0.5, 0.0)]]})
 
 
+## 难度曲线图：三条曲线各自归一化到自身最大值，图例标注实际峰值
+class ChartDrawer extends Control:
+	var series: Array = []  # [{hp, gold, dps}, ...]
+	var title := ""
+
+	var cn_font := SystemFont.new()
+
+	func _ready() -> void:
+		cn_font.font_names = PackedStringArray(["PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "sans-serif"])
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	func _draw() -> void:
+		var m := Vector2(150, 110)  # 边距
+		var size_v := Vector2(1920, 1080)
+		var plot_size := size_v - m * 2.0 - Vector2(40, 40)
+		# 背景
+		draw_rect(Rect2(Vector2.ZERO, size_v), Color(0.09, 0.11, 0.08))
+		var font := ThemeDB.fallback_font
+		draw_string(cn_font, m + Vector2(0, -30), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color(0.95, 0.82, 0.4))
+		# 坐标轴与网格（纵轴 = 波次序号，横轴 = 时间？改为：横轴 波次，纵轴 归一化强度）
+		var n := series.size()
+		draw_line(m, m + Vector2(plot_size.x, plot_size.y), Color(0.7, 0.7, 0.7), 2.0)
+		draw_line(m, m + Vector2(0, plot_size.y), Color(0.7, 0.7, 0.7), 2.0)
+		for g in range(1, 5):
+			var gy := m.y + plot_size.y * g / 5.0
+			draw_line(m + Vector2(0, plot_size.y * g / 5.0), m + Vector2(plot_size.x, plot_size.y * g / 5.0), Color(1, 1, 1, 0.08), 1.0)
+			draw_string(cn_font, m + Vector2(-56, gy + 6), "%d%%" % (100 - g * 20), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.8, 0.8, 0.8))
+		# 横轴波次刻度
+		for w in range(n):
+			if n > 14 and w % 2 == 1:
+				continue
+			var wx := m.x + plot_size.x * (w + 0.5) / n
+			draw_string(cn_font, Vector2(wx - 10, m.y + plot_size.y + 30), str(w + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.8, 0.8, 0.8))
+		draw_string(cn_font, m + Vector2(plot_size.x / 2.0 - 40, m.y + plot_size.y + 62), "波次", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.8, 0.8, 0.8))
+		# 三条曲线
+		var defs := [
+			{"key": "hp", "color": Color(0.95, 0.35, 0.3), "label": "敌方总血量"},
+			{"key": "dps", "color": Color(0.4, 0.7, 1.0), "label": "玩家预期输出"},
+			{"key": "gold", "color": Color(1.0, 0.85, 0.3), "label": "敌方赏金"},
+		]
+		var li := 0
+		for def in defs:
+			var vals: Array = []
+			var vmax := 0.001
+			for d in series:
+				vals.append(float(d[def["key"]]))
+				vmax = maxf(vmax, float(d[def["key"]]))
+			var pts := PackedVector2Array()
+			for i in range(n):
+				pts.append(m + Vector2(plot_size.x * (i + 0.5) / n, plot_size.y * (1.0 - vals[i] / vmax)))
+			draw_polyline(pts, def["color"], 4.0)
+			for p in pts:
+				draw_circle(p, 5.0, def["color"])
+			# 图例
+			var ly := m.y + 10.0 + li * 34.0
+			draw_circle(Vector2(size_v.x - 330, ly), 8.0, def["color"])
+			draw_string(cn_font, Vector2(size_v.x - 310, ly + 8), "%s（峰值 %.0f）" % [def["label"], vmax],
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.92, 0.92, 0.92))
+			li += 1
+
 class ShockRing extends Node2D:
 	var t := 0.0
 
@@ -1327,6 +1492,36 @@ func _tower_upgrade_preview(t) -> String:
 	if nxt.has("splash"):
 		parts.append("溅射 %d→%d" % [int(cur.get("splash", 0.0)), int(nxt["splash"])])
 	return " · ".join(parts)
+
+
+## 逐波统计：敌方总血量 / 敌方赏金 / 玩家累计金币可支撑的输出模型
+func _build_chart_data() -> Array:
+	var data := []
+	var cum_gold := float(start_gold)
+	for w in range(waves.size()):
+		var hp_scale := 1.0 + hp_growth * w
+		var total_hp := 0.0
+		var wave_gold := 0.0
+		for group: Dictionary in waves[w]:
+			var d: Dictionary = ENEMY_TYPES[group["type"]]
+			total_hp += d["hp"] * hp_scale * group["count"]
+			wave_gold += d["reward"] * group["count"]
+		cum_gold += wave_gold + 15.0 + 5.0 * (w + 1)
+		data.append({
+			"hp": total_hp,
+			"gold": wave_gold,
+			"dps": cum_gold * 0.28,  # 模型：金币全部折算为箭塔输出（约 0.28 DPS/金）
+		})
+	return data
+
+
+func _do_chart_capture() -> void:
+	await get_tree().create_timer(0.3).timeout
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png(
+		"/tmp/tafang_chart_L%d.png" % (level_index + 1))
+	print("[chart] saved /tmp/tafang_chart_L%d.png" % (level_index + 1))
+	get_tree().quit()
 
 
 func _wave_preview_text() -> String:
@@ -1537,9 +1732,10 @@ func _synth_notes(notes: Array, note_dur: float, amp := 0.4) -> AudioStreamWAV:
 
 func dist_to_path(p: Vector2) -> float:
 	var best := INF
-	for i in path_points.size() - 1:
-		var cp := Geometry2D.get_closest_point_to_segment(p, path_points[i], path_points[i + 1])
-		best = minf(best, p.distance_to(cp))
+	for pts: PackedVector2Array in paths:
+		for i in pts.size() - 1:
+			var cp := Geometry2D.get_closest_point_to_segment(p, pts[i], pts[i + 1])
+			best = minf(best, p.distance_to(cp))
 	return best
 
 

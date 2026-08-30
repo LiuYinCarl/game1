@@ -5,7 +5,7 @@ const TEX_TREE = preload("res://assets/td/towerDefense_tile134.png")
 const TEX_BUSH = preload("res://assets/td/towerDefense_tile130.png")
 const TEX_ROCK1 = preload("res://assets/td/towerDefense_tile135.png")
 
-const LEVEL_NAMES := ["翠绿小径", "河畔弯道", "回旋谷", "双峰峡谷", "迷雾沼泽", "王城决战"]
+const LEVEL_NAMES := GameState.LEVEL_NAMES  # 关卡名由全局状态提供（20 关）
 
 
 func _ready() -> void:
@@ -116,7 +116,7 @@ void fragment() {
 	vbox.add_child(subtitle)
 
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 22)
 	grid.add_theme_constant_override("v_separation", 22)
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
