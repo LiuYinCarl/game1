@@ -1552,22 +1552,34 @@ func _setup_music() -> void:
 	music_player.play()
 
 
-# ---------- 音效（程序化合成，无外部素材依赖） ----------
+# ---------- 音效（Kenney CC0 音效包，见 assets/sfx/CREDITS.txt） ----------
 
-## 运行时合成 16-bit 单声道 WAV：开火/爆炸/建造/金币/警报/胜负等短音效
+## 事件名 → 音效文件与音量；coin 有两个变体随机播放
+const SFX_TABLE := {
+	"shoot": {"file": "res://assets/sfx/sfx_shoot_arrow.ogg", "volume": -6.0},
+	"shoot_mage": {"file": "res://assets/sfx/sfx_shoot_mage.ogg", "volume": -6.0},
+	"shoot_cannon": {"file": "res://assets/sfx/sfx_shoot_cannon.ogg", "volume": -5.0},
+	"hit": {"file": "res://assets/sfx/sfx_hit.ogg", "volume": -12.0},
+	"hit_magic": {"file": "res://assets/sfx/sfx_hit_magic.ogg", "volume": -10.0},
+	"explosion": {"file": "res://assets/sfx/sfx_explosion.ogg", "volume": -6.0},
+	"build": {"file": "res://assets/sfx/sfx_build.ogg", "volume": -6.0},
+	"upgrade": {"file": "res://assets/sfx/sfx_upgrade.ogg", "volume": -6.0},
+	"coin": {"file": "res://assets/sfx/sfx_coin.ogg", "volume": -8.0},
+	"coin2": {"file": "res://assets/sfx/sfx_coin2.ogg", "volume": -8.0},
+	"leak": {"file": "res://assets/sfx/sfx_leak.ogg", "volume": -4.0},
+	"win": {"file": "res://assets/sfx/sfx_win.ogg", "volume": -4.0},
+	"lose": {"file": "res://assets/sfx/sfx_lose.ogg", "volume": -4.0},
+	"click": {"file": "res://assets/sfx/sfx_click.ogg", "volume": -10.0},
+}
+
 func _setup_sfx() -> void:
-	sfx_streams["shoot"] = _synth_shoot()
-	sfx_streams["shoot_mage"] = _synth_mage()
-	sfx_streams["shoot_cannon"] = _synth_cannon()
-	sfx_streams["hit"] = _synth_hit()
-	sfx_streams["explosion"] = _synth_explosion()
-	sfx_streams["build"] = _synth_build()
-	sfx_streams["upgrade"] = _synth_notes([659.0, 880.0], 0.09, 0.32)
-	sfx_streams["coin"] = _synth_notes([1319.0, 1760.0], 0.07, 0.25)
-	sfx_streams["leak"] = _synth_leak()
-	sfx_streams["win"] = _synth_notes([523.0, 659.0, 784.0, 1046.0], 0.17, 0.42)
-	sfx_streams["lose"] = _synth_notes([392.0, 311.0, 233.0], 0.28, 0.42)
-	for i in 8:
+	for key: String in SFX_TABLE:
+		var stream: AudioStream = load(SFX_TABLE[key]["file"])
+		if stream == null:
+			push_warning("音效缺失: " + key)
+			continue
+		sfx_streams[key] = {"stream": stream, "volume": SFX_TABLE[key]["volume"]}
+	for i in 10:
 		var p := AudioStreamPlayer.new()
 		p.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(p)
@@ -1575,161 +1587,18 @@ func _setup_sfx() -> void:
 
 
 func play_sfx(sfx_name: String, pitch_lo := 0.94, pitch_hi := 1.06) -> void:
+	# coin 随机二选一，避免重复感
+	if sfx_name == "coin" and randi() % 2 == 0:
+		sfx_name = "coin2"
 	if not sfx_streams.has(sfx_name):
 		return
+	var entry: Dictionary = sfx_streams[sfx_name]
 	var p: AudioStreamPlayer = sfx_pool[sfx_idx]
 	sfx_idx = (sfx_idx + 1) % sfx_pool.size()
-	p.stream = sfx_streams[sfx_name]
+	p.stream = entry["stream"]
+	p.volume_db = entry["volume"]
 	p.pitch_scale = randf_range(pitch_lo, pitch_hi)
 	p.play()
-
-
-const SFX_RATE := 22050
-
-
-func _to_wav(data: PackedByteArray) -> AudioStreamWAV:
-	var wav := AudioStreamWAV.new()
-	wav.format = AudioStreamWAV.FORMAT_16_BITS
-	wav.mix_rate = SFX_RATE
-	wav.stereo = false
-	wav.data = data
-	return wav
-
-
-func _wav_buffer(duration: float) -> PackedByteArray:
-	var data := PackedByteArray()
-	data.resize(int(duration * SFX_RATE) * 2)
-	return data
-
-
-func _put_sample(data: PackedByteArray, i: int, v: float) -> void:
-	data.encode_s16(i * 2, int(clampf(v, -1.0, 1.0) * 32000.0))
-
-
-func _synth_shoot() -> AudioStreamWAV:
-	# 箭矢"咻"：正弦快速下滑 + 短衰减
-	var dur := 0.09
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		var f := lerpf(900.0, 280.0, t01)
-		var v := sin(t * f * TAU) * exp(-t01 * 6.5) * 0.38
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_mage() -> AudioStreamWAV:
-	# 奥术"咻嗡"：上升扫频 + 五度泛音
-	var dur := 0.22
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		var f := lerpf(260.0, 1250.0, t01 * t01)
-		var env := exp(-t01 * 3.5) * minf(t01 * 12.0, 1.0)
-		var v := (sin(t * f * TAU) + 0.4 * sin(t * f * 1.5 * TAU)) * env * 0.3
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_cannon() -> AudioStreamWAV:
-	# 炮击低频"咚"：下滑正弦 + 噪声冲击
-	var dur := 0.16
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	var rng := RandomNumberGenerator.new()
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		var f := lerpf(150.0, 55.0, t01)
-		var env := exp(-t01 * 5.0)
-		var v := sin(t * f * TAU) * env * 0.8
-		v += rng.randf_range(-1, 1) * env * env * 0.35
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_hit() -> AudioStreamWAV:
-	# 命中轻响：短噪声敲击
-	var dur := 0.05
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	var rng := RandomNumberGenerator.new()
-	for i in n:
-		var t01 := float(i) / n
-		var v := rng.randf_range(-1, 1) * exp(-t01 * 9.0) * 0.3
-		v += sin(float(i) / SFX_RATE * 520.0 * TAU) * exp(-t01 * 10.0) * 0.2
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_explosion() -> AudioStreamWAV:
-	# 爆炸：低通噪声轰鸣 + 低频震荡
-	var dur := 0.5
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	var rng := RandomNumberGenerator.new()
-	var lp := 0.0
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		lp += (rng.randf_range(-1, 1) - lp) * 0.09
-		var env := exp(-t01 * 5.5)
-		var v := lp * env * 1.1
-		v += sin(t * (80.0 - 40.0 * t01) * TAU) * env * 0.4
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_build() -> AudioStreamWAV:
-	# 建造落锤：木头敲击双击
-	var dur := 0.18
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		var knock := fmod(t01, 0.09) < 0.045
-		var env := exp(-(fmod(t01, 0.09)) * 16.0) if knock else 0.0
-		var v := sin(t * 190.0 * TAU) * env * 0.55
-		v += sin(t * 95.0 * TAU) * env * 0.3
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_leak() -> AudioStreamWAV:
-	# 漏怪警报：低频方波蜂鸣带颤音
-	var dur := 0.32
-	var data := _wav_buffer(dur)
-	var n := data.size() / 2
-	for i in n:
-		var t01 := float(i) / n
-		var t := float(i) / SFX_RATE
-		var env := exp(-t01 * 3.0)
-		var sq := 1.0 if fmod(t * 190.0, 1.0) < 0.5 else -1.0
-		var v := sq * env * (0.75 + 0.25 * sin(t * TAU * 9.0)) * 0.22
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
-func _synth_notes(notes: Array, note_dur: float, amp := 0.4) -> AudioStreamWAV:
-	# 依次演奏的音符序列（升级/金币/胜负）
-	var total := int(note_dur * notes.size() * SFX_RATE)
-	var data := _wav_buffer(float(total) / SFX_RATE)
-	for i in total:
-		var t := float(i) / SFX_RATE
-		var ni := mini(int(t / note_dur), notes.size() - 1)
-		var ft := fmod(t, note_dur)
-		var env := minf(ft * 40.0, 1.0) * exp(-ft * 5.0)
-		var f: float = notes[ni]
-		var v := (sin(t * f * TAU) + 0.25 * sin(t * f * 2.0 * TAU)) * env * amp
-		_put_sample(data, i, v)
-	return _to_wav(data)
-
-
 func dist_to_path(p: Vector2) -> float:
 	var best := INF
 	for pts: PackedVector2Array in paths:
@@ -1770,6 +1639,7 @@ func _style_button(btn: Button, accent := false) -> void:
 	btn.add_theme_color_override("font_hover_color", Color(0.1, 0.07, 0.02) if accent else Color(1, 1, 1))
 	btn.add_theme_color_override("font_pressed_color", Color(0.15, 0.11, 0.05) if accent else Color(0.9, 0.88, 0.8))
 	btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.45, 0.45))
+	btn.pressed.connect(func() -> void: play_sfx("click"))
 
 
 func _build_ui() -> void:

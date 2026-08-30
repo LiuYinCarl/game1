@@ -88,7 +88,7 @@ func _hit(pos: Vector2) -> void:
 			if is_instance_valid(e) and not e.dead and e.global_position.distance_to(pos) <= splash:
 				e.take_damage(damage, damage_type)
 	else:
-		game.play_sfx("hit")
+		game.play_sfx("hit_magic" if damage_type == "magic" else "hit")
 		game.spawn_particles(pos, {"texture": hit_tex if hit_tex != null else game.FX_DOT,
 			"color": Color("fff3b0"), "count": 6, "speed": 110.0,
 			"size": hit_size, "gravity": 300.0, "lifetime": 0.35, "add": true, "rand_angle": true})

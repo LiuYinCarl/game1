@@ -1,0 +1,17 @@
+音效（sfx_*.ogg）
+来源：Kenney — RPG Audio / Impact Sounds / UI Audio / Music Jingles
+https://kenney.nl/assets/category:Audio
+许可：Creative Commons Zero (CC0)，无需署名
+说明：从上述音效包中挑选并重命名：
+  coin/coin2   = handleCoins(2)
+  build        = impactMining_000
+  upgrade      = impactGlass_heavy_000
+  shoot_arrow  = knifeSlice
+  shoot_mage   = impactGlass_heavy_002
+  shoot_cannon = impactPunch_heavy_000
+  explosion    = impactPunch_heavy_002
+  hit          = impactMetal_light_000
+  hit_magic    = impactGlass_light_000
+  leak/lose    = impactBell_heavy_000/001
+  win          = jingles_HIT00
+  click        = click1
