@@ -10,6 +10,8 @@ var slow_pct := 0.0  # 命中减速（冰霜塔）
 var slow_time := 0.0
 var freeze_chance := 0.0  # 3 级冰霜塔：概率冻结定身
 var freeze_time := 0.0
+var poison_dps := 0.0  # 毒塔：中毒持续伤害
+var poison_time := 0.0
 var chain := 0  # 3 级法师塔：连锁闪电目标数
 var chain_damage := 0.6
 var pierce := 0  # 穿透：命中后继续飞向附近的下一个目标（箭塔 3 级）
@@ -149,6 +151,8 @@ func _hit(pos: Vector2) -> void:
 			target.take_damage(damage, damage_type)
 			if slow_pct > 0.0:
 				target.apply_slow(slow_pct, slow_time)
+			if poison_dps > 0.0:
+				target.apply_poison(poison_dps, poison_time)
 			if freeze_chance > 0.0 and randf() < freeze_chance:
 				target.apply_slow(1.0, freeze_time)  # 冻结定身
 			if chain > 0 and damage_type == "magic":

@@ -48,6 +48,7 @@ var game_ended := false
 var spawn_events: Array = []
 var spawn_hp_scale := 1.0
 var wave_time := 0.0
+var level_time := 0.0  # 通关用时（结算展示）
 const WAVE_COOLDOWN := 20.0
 var wave_cooldown := -1.0  # >=0 表示自动开波倒计时中
 var wave_timer_bar: ProgressBar
@@ -449,6 +450,7 @@ func _load_level(idx: int) -> void:
 	start_gold = L["gold"]
 	start_lives = L["lives"]
 	hp_growth = L["hp_growth"]
+	level_time = 0.0
 	waves = _compose_waves(int(L["gen"][0]), L["gen"][1], paths.size())
 	# 城堡位置按主路径末端方向自动推算
 	var last: Vector2 = path_points[path_points.size() - 1]
@@ -562,6 +564,7 @@ func _process(delta: float) -> void:
 			_update_enemy_panel()
 		else:
 			_close_menu()
+	level_time += delta
 	# 屏幕震动衰减
 	if shake_amp > 0.03:
 		shake_amp = lerpf(shake_amp, 0.0, minf(1.0, delta * 9.0))
@@ -658,7 +661,14 @@ func _nearest_path_point(p: Vector2) -> Dictionary:
 func start_wave() -> void:
 	if wave_active or game_ended or next_wave >= waves.size():
 		return
-	# 提前开波奖励：倒计时剩余秒数折成金币
+	# 首关教程：前三波的引导提示
+	if level_index == 0 and next_wave <= 3:
+		var tips := {
+			1: "沿路建造箭塔，敌人从左侧出发（点击空地上的石台）",
+			2: "点击已建的塔可以升级，属性面板里能看到数值变化",
+			3: "飞行单位无法被士兵拦截，记得用箭塔对空",
+		}
+		hint_label.text = tips.get(next_wave, "")
 	if wave_cooldown > 0.0:
 		var bonus := ceili(wave_cooldown)
 		gold += bonus
@@ -683,13 +693,23 @@ func start_wave() -> void:
 	wave_timer_bar.visible = false
 	start_button.disabled = true
 	start_button.text = "第 %d 波进攻中…" % next_wave
-	hint_label.text = "第 %d 波来袭！" % next_wave
+	# 首关教程：前三波的引导提示
+	var tips := {1: "沿路建造箭塔，敌人从左侧出发（点击空地上的石台）",
+		2: "点击已建的塔可以升级，属性面板能看到数值变化",
+		3: "飞行单位无法被士兵拦截，箭塔可以直接对空"}
+	if level_index == 0 and tips.has(next_wave):
+		hint_label.text = "第 %d 波来袭！　%s" % [next_wave, tips[next_wave]]
+	else:
+		hint_label.text = "第 %d 波来袭！" % next_wave
 	_update_hud()
 
 
+var smoke_build_n := 0  # 冒烟测试建造轮转（跨波次持续）
+
+
 func _smoke_build() -> void:
-	var order := ["archer", "cannon", "mage", "barracks", "frost"]
-	var n := 0
+	var order := ["archer", "cannon", "mage", "barracks", "frost", "poison"]
+	var n := smoke_build_n
 	for i in build_spots.size():
 		if towers.has(i):
 			var t = towers[i]
@@ -697,10 +717,11 @@ func _smoke_build() -> void:
 				gold -= t.upgrade_cost()
 				t.apply_upgrade()
 			continue
-		var key: String = order[n % 3]
+		var key: String = order[n % order.size()]
 		if gold >= LevelData.TOWER_TYPES[key]["cost"]:
 			_build_tower(i, key)
 			n += 1
+	smoke_build_n = n
 
 
 func _end_wave() -> void:
@@ -727,6 +748,11 @@ func spawn_enemy(type_name: String, path_idx := 0) -> void:
 	e.died.connect(_on_enemy_died)
 	e.reached_end.connect(_on_enemy_reached_end)
 	add_child(e)
+	# Boss 出场警告
+	if type_name in ["ogre", "troll"]:
+		play_sfx("leak", 0.6, 0.7)
+		_show_banner("%s 来袭！" % LevelData.ENEMY_NAMES[type_name],
+			Color("ff6b6b") if type_name == "troll" else Color("c39bd3"))
 
 
 func _on_enemy_died(e) -> void:
@@ -1020,6 +1046,8 @@ func _on_tower_fired(tower, target) -> void:
 	p.slow_time = tower.slow_time
 	p.freeze_chance = tower.freeze_chance
 	p.freeze_time = tower.freeze_time
+	p.poison_dps = tower.poison_dps
+	p.poison_time = tower.poison_time
 	p.pierce = tower.pierce
 	p.chain = tower.chain
 	p.chain_damage = tower.chain_damage
@@ -1200,6 +1228,26 @@ class ShockRing extends Node2D:
 		draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(1.0, 0.85, 0.5, (1.0 - t) * 0.7), 3.0 * (1.0 - t) + 1.0)
 
 
+## 居中大字横幅，淡出消散
+func _show_banner(text: String, color: Color) -> void:
+	var l := Label.new()
+	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 46)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", Color(0.08, 0.04, 0.04, 0.95))
+	l.add_theme_constant_override("outline_size", 10)
+	l.position = Vector2(0, SCREEN.y * 0.28)
+	l.size = Vector2(SCREEN.x, 70)
+	ui_root.add_child(l)
+	var tw := l.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(l, "position:y", l.position.y - 40.0, 1.8)
+	tw.tween_property(l, "modulate:a", 0.0, 1.8).set_delay(0.4)
+	tw.set_parallel(false)
+	tw.tween_callback(l.queue_free)
+
+
 ## 连锁闪电：带抖动的折线电弧，短暂停留后消散
 func spawn_lightning(from: Vector2, to: Vector2) -> void:
 	var line := Line2D.new()
@@ -1264,6 +1312,8 @@ func _tower_stats_text(t) -> String:
 		text += " · 溅射半径 %d" % int(lv["splash"])
 	if lv.has("slow_pct"):
 		text += "\n命中减速 %d%%（%.0f 秒）· 群体控场" % [int(lv["slow_pct"] * 100), t.slow_time]
+	if lv.has("poison_dps") or t.poison_dps > 0.0:
+		text += "\n中毒：每秒 %d 点（%.0f 秒）" % [int(t.poison_dps if t.poison_dps > 0.0 else lv.get("poison_dps", 0.0)), t.poison_time]
 	if t.pierce > 0:
 		text += "\n穿透：弹道可命中 %d 个目标" % (t.pierce + 1)
 	return text
@@ -1352,6 +1402,7 @@ const SFX_TABLE := {
 	"shoot_mage": {"file": "res://assets/sfx/sfx_shoot_mage.ogg", "volume": -6.0},
 	"shoot_cannon": {"file": "res://assets/sfx/sfx_shoot_cannon.ogg", "volume": -5.0},
 	"shoot_frost": {"file": "res://assets/sfx/sfx_hit_magic.ogg", "volume": -8.0},
+	"shoot_poison": {"file": "res://assets/sfx/sfx_shoot_poison.ogg", "volume": -8.0},
 	"hit": {"file": "res://assets/sfx/sfx_hit.ogg", "volume": -12.0},
 	"hit_magic": {"file": "res://assets/sfx/sfx_hit_magic.ogg", "volume": -10.0},
 	"explosion": {"file": "res://assets/sfx/sfx_explosion.ogg", "volume": -6.0},

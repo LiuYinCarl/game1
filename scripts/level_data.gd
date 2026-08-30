@@ -128,6 +128,18 @@ const TOWER_TYPES := {
 		"weapon_frames": [6, 7, 9], "weapon_scale": 0.9,
 		"projs": [preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png")],
 		"proj_size": 22.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/spark_05.png"},
+	"poison": {"name": "毒塔", "cost": 110, "damage_type": "magic", "proj_speed": 340.0, "color": Color("6ab04c"),
+		"poison_time": 3.0, "weapon_tint": Color(0.7, 1.35, 0.7),
+		"levels": [
+			{"damage": 8.0, "rate": 1.1, "range": 200.0, "poison_dps": 10.0},
+			{"damage": 12.0, "rate": 1.05, "range": 212.0, "poison_dps": 18.0, "cost": 85},
+			{"damage": 18.0, "rate": 1.0, "range": 224.0, "poison_dps": 30.0, "cost": 140},
+		],
+		"base": preload("res://assets/spire/tower_poison_base.png"),
+		"weapons": [preload("res://assets/spire/tower_poison_w1.png"), preload("res://assets/spire/tower_poison_w2.png"), preload("res://assets/spire/tower_poison_w3.png")],
+		"weapon_frames": [17, 17, 17], "weapon_scale": 0.75,
+		"projs": [preload("res://assets/spire/tower_poison_p.png"), preload("res://assets/spire/tower_poison_p.png"), preload("res://assets/spire/tower_poison_p.png")],
+		"proj_size": 24.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/circle_05.png"},
 	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
 		"levels": [
 			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
@@ -193,6 +205,7 @@ const ENEMY_NAMES := {
 const TOWER_ROLE := {
 	"archer": "单体速射 · 物理伤害", "mage": "高伤爆发 · 魔法伤害",
 	"cannon": "范围溅射 · 物理伤害", "frost": "减速控场 · 魔法伤害",
+	"poison": "持续毒伤 · 魔法伤害",
 	"barracks": "派出士兵拦截敌人",
 }
 

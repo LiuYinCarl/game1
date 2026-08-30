@@ -35,6 +35,9 @@ var slow_time := 0.0
 var pierce := 0  # 箭塔 3 级技能：穿透额外目标数
 var freeze_chance := 0.0  # 冰霜塔 3 级：冻结概率/时长
 var freeze_time := 0.0
+var poison_dps := 0.0  # 毒塔：中毒持续伤害/时长
+var poison_time := 0.0
+var weapon_tint := Color.WHITE
 var burst := 1  # 炮塔 3 级：弹幕连发数量
 var chain := 0  # 法师塔 3 级：连锁闪电目标数
 var chain_damage := 0.6
@@ -77,6 +80,9 @@ func setup(type_name: String, data: Dictionary) -> void:
 	projs = data.get("projs", [proj_tex, proj_tex, proj_tex])
 	slow_pct = data.get("slow_pct", 0.0)
 	slow_time = data.get("slow_time", 0.0)
+	poison_dps = data.get("poison_dps", 0.0)
+	poison_time = data.get("poison_time", 0.0)
+	weapon_tint = data.get("weapon_tint", Color.WHITE)
 	turret = Sprite2D.new()
 	if weapons[0] != null:
 		turret.texture = weapons[0]
@@ -101,6 +107,7 @@ func _refresh() -> void:
 	current_range = lv.get("range", 0.0)
 	splash = lv.get("splash", 0.0)
 	pierce = lv.get("pierce", 0)
+	poison_dps = lv.get("poison_dps", poison_dps)
 	freeze_chance = lv.get("freeze_chance", 0.0)
 	freeze_time = lv.get("freeze_time", 0.0)
 	burst = lv.get("burst", 1)
@@ -108,6 +115,7 @@ func _refresh() -> void:
 	chain_damage = lv.get("chain_damage", 0.6)
 	# 等级外观：底座换帧 + 换武器贴图
 	base.frame = level - 1
+	turret.modulate = weapon_tint
 	if weapons[level - 1] != null:
 		turret.texture = weapons[level - 1]
 		turret.hframes = weapon_frames_arr[level - 1]

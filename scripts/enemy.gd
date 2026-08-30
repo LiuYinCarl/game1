@@ -29,6 +29,9 @@ var attack_cd := 0.0
 var selected := false
 var speed_mult := 1.0  # 减速倍率（<1 为被减速）
 var slow_timer := 0.0
+var poison_dps := 0.0  # 中毒持续伤害（最强毒生效）
+var poison_timer := 0.0
+var poison_tick := 0.0
 
 var sprite: Sprite2D
 var anim_time := 0.0
@@ -71,7 +74,17 @@ func setup(type_name: String, pts: PackedVector2Array, data: Dictionary, hp_scal
 func apply_slow(pct: float, duration: float) -> void:
 	speed_mult = minf(speed_mult, 1.0 - pct) if slow_timer > 0.0 else 1.0 - pct
 	slow_timer = maxf(slow_timer, duration)
-	sprite.modulate = tint.lerp(Color(0.55, 0.8, 2.0), 0.55)
+	if sprite != null:
+		sprite.modulate = tint.lerp(Color(0.55, 0.8, 2.0), 0.55)
+
+
+## 中毒：每 0.5 秒结算一次持续伤害（魔法），取最强毒
+func apply_poison(dps: float, duration: float) -> void:
+	poison_dps = maxf(poison_dps, dps)
+	poison_timer = maxf(poison_timer, duration)
+	poison_tick = minf(poison_tick, 0.25)
+	if sprite != null:
+		sprite.modulate = tint.lerp(Color(0.55, 1.5, 0.45), 0.5)
 
 
 func _process(delta: float) -> void:
@@ -82,7 +95,18 @@ func _process(delta: float) -> void:
 		slow_timer -= delta
 		if slow_timer <= 0.0:
 			speed_mult = 1.0
-			sprite.modulate = tint
+			if sprite != null:
+				sprite.modulate = tint
+	if poison_timer > 0.0:
+		poison_timer -= delta
+		poison_tick -= delta
+		if poison_tick <= 0.0:
+			poison_tick = 0.5
+			take_damage(poison_dps * 0.5, "magic")
+		if poison_timer <= 0.0:
+			poison_dps = 0.0
+			if sprite != null:
+				sprite.modulate = tint
 	# 被士兵拦截：驻停对拼，不推进
 	if blocked_by != null:
 		if not is_instance_valid(blocked_by):
