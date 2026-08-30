@@ -17,7 +17,6 @@ var proj_size := 12.0
 var hit_tex: Texture2D
 var hit_size := 0.03
 var damage_type := "physical"  # physical / magic
-var color := Color.WHITE
 var invested := 0
 
 var current_damage := 0.0
@@ -65,7 +64,6 @@ func setup(type_name: String, data: Dictionary) -> void:
 	if data.has("hit_tex"):
 		hit_tex = load(data["hit_tex"])
 	hit_size = data.get("hit_size", 0.03)
-	color = data["color"]
 	invested = base_cost
 	# 底座：一张图含 1/2/3 级三个外观帧
 	base = Sprite2D.new()

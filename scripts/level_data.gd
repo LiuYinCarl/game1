@@ -83,7 +83,7 @@ const LEVELS := [
 ]
 
 const TOWER_TYPES := {
-	"archer": {"name": "箭塔", "cost": 70, "damage_type": "physical", "proj_speed": 480.0, "color": Color("c07f2a"),
+	"archer": {"name": "箭塔", "cost": 70, "damage_type": "physical", "proj_speed": 480.0,
 		"levels": [
 			{"damage": 9.0, "rate": 0.45, "range": 200.0},
 			{"damage": 14.0, "rate": 0.40, "range": 212.0, "cost": 60},
@@ -94,7 +94,7 @@ const TOWER_TYPES := {
 		"weapon_frames": 6, "weapon_scale": 0.85,
 		"projs": [preload("res://assets/spire/tower_archer_p1.png"), preload("res://assets/spire/tower_archer_p2.png"), preload("res://assets/spire/tower_archer_p3.png")],
 		"proj_size": 26.0, "hit_size": 0.025, "hit_tex": "res://assets/fx/circle_05.png"},
-	"mage": {"name": "法师塔", "cost": 100, "damage_type": "magic", "proj_speed": 340.0, "color": Color("7a5fd0"),
+	"mage": {"name": "法师塔", "cost": 100, "damage_type": "magic", "proj_speed": 340.0,
 		"levels": [
 			{"damage": 26.0, "rate": 1.15, "range": 190.0},
 			{"damage": 42.0, "rate": 1.05, "range": 202.0, "cost": 85},
@@ -105,7 +105,7 @@ const TOWER_TYPES := {
 		"weapon_frames": 8, "weapon_scale": 0.85,
 		"projs": [preload("res://assets/spire/tower_mage_p1.png"), preload("res://assets/spire/tower_mage_p2.png"), preload("res://assets/spire/tower_mage_p3.png")],
 		"proj_size": 16.0, "hit_size": 0.09, "hit_tex": "res://assets/fx/spark_05.png"},
-	"cannon": {"name": "炮塔", "cost": 125, "damage_type": "physical", "proj_speed": 300.0, "color": Color("555555"),
+	"cannon": {"name": "炮塔", "cost": 125, "damage_type": "physical", "proj_speed": 300.0,
 		"levels": [
 			{"damage": 20.0, "rate": 1.6, "range": 190.0, "splash": 70.0},
 			{"damage": 34.0, "rate": 1.45, "range": 202.0, "splash": 80.0, "cost": 105},
@@ -116,7 +116,7 @@ const TOWER_TYPES := {
 		"weapon_frames": 6, "weapon_scale": 0.95,
 		"projs": [preload("res://assets/spire/tower_cannon_p1.png"), preload("res://assets/spire/tower_cannon_p2.png"), preload("res://assets/spire/tower_cannon_p3.png")],
 		"proj_size": 26.0},
-	"frost": {"name": "冰霜塔", "cost": 90, "damage_type": "magic", "proj_speed": 380.0, "color": Color("5ab8d8"),
+	"frost": {"name": "冰霜塔", "cost": 90, "damage_type": "magic", "proj_speed": 380.0,
 		"slow_time": 2.0,
 		"levels": [
 			{"damage": 5.0, "rate": 1.0, "range": 200.0, "slow_pct": 0.4},
@@ -128,7 +128,7 @@ const TOWER_TYPES := {
 		"weapon_frames": [6, 7, 9], "weapon_scale": 0.9,
 		"projs": [preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png"), preload("res://assets/spire/tower_frost_p.png")],
 		"proj_size": 22.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/spark_05.png"},
-	"poison": {"name": "毒塔", "cost": 110, "damage_type": "magic", "proj_speed": 340.0, "color": Color("6ab04c"),
+	"poison": {"name": "毒塔", "cost": 110, "damage_type": "magic", "proj_speed": 340.0,
 		"poison_time": 3.0, "weapon_tint": Color(0.7, 1.35, 0.7),
 		"levels": [
 			{"damage": 8.0, "rate": 1.1, "range": 200.0, "poison_dps": 10.0},
@@ -140,7 +140,7 @@ const TOWER_TYPES := {
 		"weapon_frames": [17, 17, 17], "weapon_scale": 0.75,
 		"projs": [preload("res://assets/spire/tower_poison_p.png"), preload("res://assets/spire/tower_poison_p.png"), preload("res://assets/spire/tower_poison_p.png")],
 		"proj_size": 24.0, "hit_size": 0.05, "hit_tex": "res://assets/fx/circle_05.png"},
-	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical", "color": Color("4a6a9a"),
+	"barracks": {"name": "兵营", "cost": 110, "damage_type": "physical",
 		"levels": [
 			{"soldiers": 2, "soldier_hp": 60.0, "soldier_dmg": 7.0, "respawn": 6.0, "range": 190.0},
 			{"soldiers": 3, "soldier_hp": 95.0, "soldier_dmg": 12.0, "respawn": 5.0, "range": 190.0, "cost": 90},
