@@ -1527,9 +1527,8 @@ func _build_ui() -> void:
 	ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_root.process_mode = Node.PROCESS_MODE_ALWAYS
 	layer.add_child(ui_root)
-	# 系统中文字体，避免默认字体缺字
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "sans-serif"])
+	# 中文字体：打包 Noto Sans SC（OFL），跨平台且不缺字
+	var font: Font = load("res://assets/fonts/NotoSansSC-Regular.otf")
 	var theme := Theme.new()
 	theme.default_font = font
 	theme.default_font_size = 16

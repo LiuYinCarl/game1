@@ -28,18 +28,6 @@ class Backdrop extends Node2D:
 			var r := rng.randf_range(60, 190)
 			var c: Color = Color("79a84c") if rng.randf() < 0.5 else Color("628e3a")
 			draw_circle(p, r, Color(c.r, c.g, c.b, 0.32))
-		# 蜿蜒小路
-		var path := PackedVector2Array([Vector2(-60, 900), Vector2(420, 820), Vector2(760, 980),
-			Vector2(1150, 760), Vector2(1500, 900), Vector2(2000, 700)])
-		draw_polyline(path, Color(0, 0, 0, 0.15), 88.0)
-		for p in path:
-			draw_circle(p + Vector2(0, 9), 44.0, Color(0, 0, 0, 0.15))
-		draw_polyline(path, Color("9c7c50"), 84.0)
-		for p in path:
-			draw_circle(p, 42.0, Color("9c7c50"))
-		draw_polyline(path, Color("c8a76c"), 66.0)
-		for p in path:
-			draw_circle(p, 33.0, Color("c8a76c"))
 		# 装饰（树/灌木/石头），避开中上部的标题与卡片区
 		var deco: Array = [TEX_TREE, TEX_BUSH, TEX_ROCK1]
 		rng.seed = 9
@@ -79,9 +67,8 @@ void fragment() {
 	vignette.material = vmat
 	add_child(vignette)
 
-	# 中文系统字体
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "sans-serif"])
+	# 中文字体：打包 Noto Sans SC（OFL），跨平台且不缺字
+	var font: Font = load("res://assets/fonts/NotoSansSC-Regular.otf")
 	var th := Theme.new()
 	th.default_font = font
 	th.default_font_size = 18
